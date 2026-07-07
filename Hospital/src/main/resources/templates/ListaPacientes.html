@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Pacientes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="navbar" role="banner">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
+                <a class="navbar-brand" th:href="@{/listaPacientes}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
+                <nav class="navbar-nav" aria-label="Main navigation">
+                    <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
+                    <a class="nav-link" th:href="@{/pacienteNuevo}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Nuevo Paciente</a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content" role="main">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Lista de Pacientes</h1>
+                    <a th:href="@{/pacienteNuevo}" class="btn btn-primary">Nuevo Paciente</a>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>Cédula</th>
+                                        <th>Email</th>
+                                        <th>Dirección</th>
+                                        <th>Teléfono</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="paciente : ${listaPacientes}">
+                                        <td th:text="${paciente.id}"></td>
+                                        <td th:text="${paciente.nombre}"></td>
+                                        <td th:text="${paciente.apellido}"></td>
+                                        <td th:text="${paciente.cedula}"></td>
+                                        <td th:text="${paciente.email}"></td>
+                                        <td th:text="${paciente.direccion}"></td>
+                                        <td th:text="${paciente.telefono}"></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a th:href="@{/EditarPaciente/{id}(id=${paciente.id})}" class="btn btn-sm btn-outline">Editar</a>
+                                                <a th:href="@{/eliminarPaciente(id=${paciente.id})}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este paciente?');">Eliminar</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${listaPacientes.empty}">
+                                        <td colspan="8" class="text-center" style="padding: 3rem;">No hay pacientes registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                Hospital - Sistema de Gestión
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

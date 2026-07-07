@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Médicos</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="navbar" role="banner">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
+                <a class="navbar-brand" th:href="@{/listaMedicos}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
+                <nav class="navbar-nav" aria-label="Main navigation">
+                    <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
+                    <a class="nav-link" th:href="@{/nuevoMedico}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Nuevo Médico</a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content" role="main">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Lista de Médicos</h1>
+                    <a th:href="@{/nuevoMedico}" class="btn btn-primary">Nuevo Médico</a>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>Cédula</th>
+                                        <th>Email</th>
+                                        <th>Dirección</th>
+                                        <th>Teléfono</th>
+                                        <th>Especialidad</th>
+                                        <th>Disponibilidad Horaria</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="medico : ${medicos}">
+                                        <td th:text="${medico.id}"></td>
+                                        <td th:text="${medico.nombre}"></td>
+                                        <td th:text="${medico.apellido}"></td>
+                                        <td th:text="${medico.cedula}"></td>
+                                        <td th:text="${medico.email}"></td>
+                                        <td th:text="${medico.direccion}"></td>
+                                        <td th:text="${medico.telefono}"></td>
+                                        <td th:text="${medico.especialidad}"></td>
+                                        <td th:text="${medico.disponibilidadHoraria}"></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a th:href="@{/editarMedico(id=${medico.id})}" class="btn btn-sm btn-outline">Editar</a>
+                                                <a th:href="@{/eliminarMedico(id=${medico.id})}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este médico?');">Eliminar</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${medicos.empty}">
+                                        <td colspan="10" class="text-center" style="padding: 3rem;">No hay médicos registrados registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                Hospital - Sistema de Gestión
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
