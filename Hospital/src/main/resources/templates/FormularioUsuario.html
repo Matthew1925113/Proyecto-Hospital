@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${paciente.id} == null ? 'Nuevo Paciente' : 'Editar Paciente'">Paciente</title>
+    <title th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'">Usuario</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -11,11 +11,10 @@
         <header class="navbar" role="banner">
             <div class="container">
                 <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
-                <a class="navbar-brand" th:href="@{/listaPacientes}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
+                <a class="navbar-brand" th:href="@{/listaUsuarios}" sec:authorize="hasAnyRole('ADMIN')">Hospital</a>
                 <nav class="navbar-nav" aria-label="Main navigation">
                     <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
-                    <a class="nav-link" th:href="@{/listaPacientes}">Lista Pacientes</a>
-                    <a class="nav-link" th:href="@{/listaUsuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
+                    <a class="nav-link" th:href="@{/listaUsuarios}">Lista Usuarios</a>
                 </nav>
             </div>
         </header>
@@ -23,13 +22,14 @@
         <main class="main-content" role="main">
             <div class="container">
                 <div class="page-header">
-                    <h1 th:text="${paciente.id} == null ? 'Nuevo Paciente' : 'Editar Paciente'">Paciente</h1>
+                    <h1 th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'">Usuario</h1>
                 </div>
 
                 <div class="card">
                     <div class="card-body">
                         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
-                        <form th:action="@{/GuardarPaciente}" th:object="${paciente}" method="post">
+
+                        <form th:action="@{/GuardarUsuario}" th:object="${usuario}" method="post">
                             <input type="hidden" th:field="*{id}" />
 
                             <div class="form-group">
@@ -38,33 +38,27 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="apellido" class="form-label">Apellido</label>
-                                <input type="text" id="apellido" th:field="*{apellido}" class="form-input" placeholder="Ingrese el apellido" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="cedula" class="form-label">Cédula</label>
-                                <input type="text" id="cedula" th:field="*{cedula}" class="form-input" placeholder="Ingrese la cédula" required>
-                            </div>
-
-                            <div class="form-group">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" id="email" th:field="*{email}" class="form-input" placeholder="Ingrese el email" required>
                             </div>
 
                             <div class="form-group">
-                                <label for="direccion" class="form-label">Dirección</label>
-                                <input type="text" id="direccion" th:field="*{direccion}" class="form-input" placeholder="Ingrese la dirección" required>
+                                <label for="password" class="form-label" th:text="${usuario.id} == null ? 'Contraseña' : 'Nueva Contraseña (dejar en blanco para mantener la actual)'">Contraseña</label>
+                                <input type="password" id="password" th:field="*{password}" class="form-input" th:required="${usuario.id} == null" placeholder="Ingrese la contraseña">
                             </div>
 
                             <div class="form-group">
-                                <label for="telefono" class="form-label">Teléfono</label>
-                                <input type="text" id="telefono" th:field="*{telefono}" class="form-input" placeholder="Ingrese el teléfono" required>
+                                <label for="rol" class="form-label">Rol</label>
+                                <select id="rol" th:field="*{rol}" class="form-input" required>
+                                    <option value="">Seleccione un rol</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="USUARIO">USUARIO</option>
+                                </select>
                             </div>
 
                             <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
                                 <button type="submit" class="btn btn-primary">Guardar</button>
-                                <a th:href="@{/listaPacientes}" class="btn btn-outline">Cancelar</a>
+                                <a th:href="@{/listaUsuarios}" class="btn btn-outline">Cancelar</a>
                             </div>
                         </form>
                     </div>

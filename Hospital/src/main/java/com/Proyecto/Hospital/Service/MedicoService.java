@@ -22,8 +22,27 @@ public class MedicoService {
         return repository.findById(id).orElse(null);
     }
 
-    public void GuardarMedico(Medico medico) {
+    public String GuardarMedico(Medico medico) {
+        if (medico.getId() == null) {
+            // Nuevo medico, realizar operaciones adicionales si es necesario
+            if (repository.findByEmail(medico.getEmail()).isPresent()) {
+                return "El email ya esta en uso";
+            }
+            else if (repository.findByCedula(medico.getCedula()).isPresent()) {
+                return "La cedula ya esta en uso";
+            }
+        } else {
+            Medico existente = repository.findByEmail(medico.getEmail()).orElse(null);
+            if (existente != null && !existente.getId().equals(medico.getId())) {
+                return "El email ya esta en uso";
+            }
+            Medico existente2 = repository.findByCedula(medico.getCedula()).orElse(null);
+            if (existente2 != null && !existente2.getId().equals(medico.getId())) {
+                return "La cedula ya esta en uso";
+            }
+        }
         repository.save(medico);
+        return "El medico ha sido guardado correctamente";
     }
 
     public void EliminarMedico(Long id) {

@@ -15,6 +15,7 @@
                 <nav class="navbar-nav" aria-label="Main navigation">
                     <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
                     <a class="nav-link" th:href="@{/pacienteNuevo}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Nuevo Paciente</a>
+                    <a class="nav-link" th:href="@{/listaUsuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
                     <form th:action="@{/logout}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
                     </form>

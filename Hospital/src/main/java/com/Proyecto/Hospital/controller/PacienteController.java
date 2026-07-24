@@ -42,9 +42,17 @@ public class PacienteController {
     }
 
     @PostMapping("/GuardarPaciente")
-    public String updatePaciente(@ModelAttribute Paciente paciente) {
-        service.GuardarPaciente(paciente);
-        return "redirect:/listaPacientes";
+    public String updatePaciente(@ModelAttribute Paciente paciente, Model model) {
+        String mensaje = service.GuardarPaciente(paciente);
+        if (mensaje.equals("El paciente ha sido guardado correctamente")) {
+            return "redirect:/listaPacientes";
+        } else {
+            model.addAttribute("error", mensaje);
+            model.addAttribute("paciente", paciente);
+            return "FormularioPaciente";
+        }
+
+
     }
 
     @GetMapping({"/eliminarPaciente", "/EliminarPaciente"})

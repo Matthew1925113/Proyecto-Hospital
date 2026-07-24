@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Médicos</title>
+    <title>Lista de Usuarios</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -11,10 +11,9 @@
         <header class="navbar" role="banner">
             <div class="container">
                 <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
-                <a class="navbar-brand" th:href="@{/listaMedicos}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
+                <a class="navbar-brand" th:href="@{/listaPacientes}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
                 <nav class="navbar-nav" aria-label="Main navigation">
                     <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
-                    <a class="nav-link" th:href="@{/nuevoMedico}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Nuevo Médico</a>
                     <a class="nav-link" th:href="@{/listaUsuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
                     <form th:action="@{/logout}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
@@ -26,8 +25,8 @@
         <main class="main-content" role="main">
             <div class="container">
                 <div class="page-header">
-                    <h1>Lista de Médicos</h1>
-                    <a th:href="@{/nuevoMedico}" class="btn btn-primary">Nuevo Médico</a>
+                    <h1>Lista de Usuarios</h1>
+                    <a th:href="@{/nuevoUsuario}" class="btn btn-primary">Nuevo Usuario</a>
                 </div>
 
                 <div class="card">
@@ -38,36 +37,26 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Nombre</th>
-                                        <th>Apellido</th>
-                                        <th>Cédula</th>
                                         <th>Email</th>
-                                        <th>Dirección</th>
-                                        <th>Teléfono</th>
-                                        <th>Especialidad</th>
-                                        <th>Disponibilidad Horaria</th>
+                                        <th>Rol</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="medico : ${medicos}">
-                                        <td th:text="${medico.id}"></td>
-                                        <td th:text="${medico.nombre}"></td>
-                                        <td th:text="${medico.apellido}"></td>
-                                        <td th:text="${medico.cedula}"></td>
-                                        <td th:text="${medico.email}"></td>
-                                        <td th:text="${medico.direccion}"></td>
-                                        <td th:text="${medico.telefono}"></td>
-                                        <td th:text="${medico.especialidad}"></td>
-                                        <td th:text="${medico.disponibilidadHoraria}"></td>
+                                    <tr th:each="usuario : ${listaUsuarios}">
+                                        <td th:text="${usuario.id}"></td>
+                                        <td th:text="${usuario.nombre}"></td>
+                                        <td th:text="${usuario.email}"></td>
+                                        <td th:text="${usuario.rol}"></td>
                                         <td>
                                             <div class="btn-group">
-                                                <a th:href="@{/editarMedico(id=${medico.id})}" class="btn btn-sm btn-outline">Editar</a>
-                                                <a th:href="@{/eliminarMedico(id=${medico.id})}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este médico?');">Eliminar</a>
+                                                <a th:href="@{/EditarUsuario/{id}(id=${usuario.id})}" class="btn btn-sm btn-outline">Editar</a>
+                                                <a th:href="@{/eliminarUsuario(id=${usuario.id})}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este usuario?');">Eliminar</a>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr th:if="${medicos.empty}">
-                                        <td colspan="10" class="text-center" style="padding: 3rem;">No hay médicos registrados registrados</td>
+                                    <tr th:if="${listaUsuarios.empty}">
+                                        <td colspan="5" class="text-center" style="padding: 3rem;">No hay usuarios registrados</td>
                                     </tr>
                                 </tbody>
                             </table>

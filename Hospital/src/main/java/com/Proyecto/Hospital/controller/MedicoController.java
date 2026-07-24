@@ -31,9 +31,16 @@ public class MedicoController {
     }
 
     @PostMapping({"/guardarMedico", "/GuardarMedico"})
-    public String guardarMedico(Medico medico) {
-        service.GuardarMedico(medico);
-        return "redirect:/listaMedicos";
+    public String guardarMedico(Medico medico, Model model) {
+        String mensaje = service.GuardarMedico(medico);
+        if (mensaje.equals("El medico ha sido guardado correctamente")) {
+            return "redirect:/listaMedicos";
+        } else {
+            model.addAttribute("error", mensaje);
+            model.addAttribute("medico", medico);
+            return "formularioMedico";
+        }
+        
     }
 
     @GetMapping({"/editarMedico", "/EditarMedico"})

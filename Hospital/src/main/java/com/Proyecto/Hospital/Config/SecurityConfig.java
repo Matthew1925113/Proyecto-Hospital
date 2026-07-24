@@ -30,9 +30,9 @@ public class SecurityConfig  {
                 .requestMatchers("/login", "/acceso-denegado", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 // Rutas privadas
                 .requestMatchers("/inicio").hasAnyRole("ADMIN", "USUARIO")
-                .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", "/eliminarPaciente", "/EliminarPaciente", "/medicos").hasRole("ADMIN")
+                .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", "/eliminarPaciente", "/EliminarPaciente", "/medicos", "/listaUsuarios", "/Usuarios", "/nuevoUsuario", "/FormularioUsuario", "/EditarUsuario/**", "/editarUsuario/**", "/GuardarUsuario", "/eliminarUsuario", "/EliminarUsuario").hasRole("ADMIN")
                 .requestMatchers("/citas", "/perfil", "/actualizarPerfil").hasRole("USUARIO")
-                .anyRequest().authenticated()
+                .anyRequest().hasRole("ADMIN")
             )
             .formLogin(form -> form
                 .loginPage("/login")

@@ -23,9 +23,31 @@ public class PacienteService {
         return repository.findById(id).orElse(null);
     }
 
-    public void GuardarPaciente(Paciente paciente) {
+    public String GuardarPaciente(Paciente paciente) {
+        if (paciente.getId() == null) {
+            // Nuevo paciente, realizar operaciones adicionales si es necesario
+            if (repository.findByEmail(paciente.getEmail()).isPresent()) {
+                return "El email ya esta en uso";
+            }
+            else if (repository.findByCedula(paciente.getCedula()).isPresent()) {
+                return "La cedula ya esta en uso";
+            }
+        } else {
+            Paciente existente = repository.findByEmail(paciente.getEmail()).orElse(null);
+            if (existente != null && !existente.getId().equals(paciente.getId())) {
+                return "El email ya esta en uso";
+            }
+            Paciente existente2 = repository.findByCedula(paciente.getCedula()).orElse(null);
+            if (existente2 != null && !existente2.getId().equals(paciente.getId())) {
+                return "La cedula ya esta en uso";
+            }
+        }
         repository.save(paciente);
-    }
+        return "El paciente ha sido guardado correctamente";
+}
+
+
+
 
     public void EliminarPaciente(Long id) {
         repository.deleteById(id);

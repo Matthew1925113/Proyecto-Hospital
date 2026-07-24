@@ -15,6 +15,7 @@
                 <nav class="navbar-nav" aria-label="Main navigation">
                     <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
                     <a class="nav-link" th:href="@{/listaMedicos}">Lista Médicos</a>
+                    <a class="nav-link" th:href="@{/listaUsuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
                 </nav>
             </div>
         </header>
