@@ -196,6 +196,63 @@ a:hover {
   border: 1px solid #bbf7d0;
 }
 
+.phone-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.phone-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.phone-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.phone-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+}
+
+.phone-number {
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.phone-number::before {
+  content: "\1F4DE";
+  margin-right: 0.5rem;
+}
+
+.phone-add-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.phone-add-form .form-input {
+  flex: 1;
+}
+
+.inline-form {
+  margin: 0;
+}
+
 .table-container {
   overflow-x: auto;
 }

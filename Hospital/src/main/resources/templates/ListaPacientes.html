@@ -30,6 +30,9 @@
                     <a th:href="@{/pacienteNuevo}" class="btn btn-primary">Nuevo Paciente</a>
                 </div>
 
+                <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -54,7 +57,12 @@
                                         <td th:text="${paciente.cedula}"></td>
                                         <td th:text="${paciente.email}"></td>
                                         <td th:text="${paciente.direccion}"></td>
-                                        <td th:text="${paciente.telefono}"></td>
+                                        <td>
+                                            <span th:if="${#lists.isEmpty(paciente.telefono)}">Sin telefonos</span>
+                                            <ul th:unless="${#lists.isEmpty(paciente.telefono)}">
+                                                <li th:each="telefono : ${paciente.telefono}" th:text="${telefono.numero}"></li>
+                                            </ul>
+                                        </td>
                                         <td>
                                             <div class="btn-group">
                                                 <a th:href="@{/EditarPaciente/{id}(id=${paciente.id})}" class="btn btn-sm btn-outline">Editar</a>

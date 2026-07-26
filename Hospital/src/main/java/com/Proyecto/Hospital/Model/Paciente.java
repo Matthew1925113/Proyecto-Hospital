@@ -1,10 +1,14 @@
 package com.Proyecto.Hospital.Model;
 
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 
 @Entity
@@ -20,7 +24,9 @@ public class Paciente {
     @Column (unique = true)
     private String email;
     private String direccion;
-    private String telefono;
+    
+    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Telefono> telefono = new ArrayList<>();
 
     public Paciente() {
     }
@@ -75,11 +81,11 @@ public class Paciente {
         this.direccion = direccion;
     }
 
-    public String getTelefono() {
+    public List<Telefono> getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(String telefono) {
+    public void setTelefono(List<Telefono> telefono) {
         this.telefono = telefono;
     }
 

@@ -41,7 +41,14 @@ public class PacienteService {
             if (existente2 != null && !existente2.getId().equals(paciente.getId())) {
                 return "La cedula ya esta en uso";
             }
+            Paciente dbPaciente = repository.findById(paciente.getId()).orElse(null);
+            if (dbPaciente != null) {
+                paciente.setTelefono(dbPaciente.getTelefono());
+            }
         }
+
+        paciente.getTelefono().removeIf(telefono -> telefono.getNumero() == null || telefono.getNumero().isBlank());
+        paciente.getTelefono().forEach(telefono -> telefono.setPaciente(paciente));
         repository.save(paciente);
         return "El paciente ha sido guardado correctamente";
 }

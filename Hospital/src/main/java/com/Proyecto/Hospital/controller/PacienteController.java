@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PacienteController {
@@ -42,9 +43,10 @@ public class PacienteController {
     }
 
     @PostMapping("/GuardarPaciente")
-    public String updatePaciente(@ModelAttribute Paciente paciente, Model model) {
+    public String updatePaciente(@ModelAttribute Paciente paciente, Model model, RedirectAttributes redirectAttributes) {
         String mensaje = service.GuardarPaciente(paciente);
         if (mensaje.equals("El paciente ha sido guardado correctamente")) {
+            redirectAttributes.addFlashAttribute("success", mensaje);
             return "redirect:/listaPacientes";
         } else {
             model.addAttribute("error", mensaje);
@@ -56,8 +58,9 @@ public class PacienteController {
     }
 
     @GetMapping({"/eliminarPaciente", "/EliminarPaciente"})
-    public String deletePaciente(@RequestParam Long id) {
+    public String deletePaciente(@RequestParam Long id, RedirectAttributes redirectAttributes) {
         service.EliminarPaciente(id);
+        redirectAttributes.addFlashAttribute("success", "Paciente eliminado correctamente");
         return "redirect:/listaPacientes";
     }
 }

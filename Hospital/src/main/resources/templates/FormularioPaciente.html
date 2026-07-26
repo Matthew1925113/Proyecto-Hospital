@@ -28,6 +28,7 @@
 
                 <div class="card">
                     <div class="card-body">
+                        <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
                         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
                         <form th:action="@{/GuardarPaciente}" th:object="${paciente}" method="post">
                             <input type="hidden" th:field="*{id}" />
@@ -57,16 +58,38 @@
                                 <input type="text" id="direccion" th:field="*{direccion}" class="form-input" placeholder="Ingrese la dirección" required>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" th:if="${paciente.id} == null">
                                 <label for="telefono" class="form-label">Teléfono</label>
-                                <input type="text" id="telefono" th:field="*{telefono}" class="form-input" placeholder="Ingrese el teléfono" required>
+                                <input type="text" id="telefono" th:field="*{telefono[0].numero}" class="form-input" placeholder="Ingrese el teléfono" required>
                             </div>
+
 
                             <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
                                 <button type="submit" class="btn btn-primary">Guardar</button>
                                 <a th:href="@{/listaPacientes}" class="btn btn-outline">Cancelar</a>
                             </div>
                         </form>
+
+                        <div th:if="${paciente.id} != null" class="phone-section">
+                            <h3>Teléfonos</h3>
+                            <ul class="phone-list">
+                                <li th:each="tel : ${paciente.telefono}" class="phone-item">
+                                    <span class="phone-number" th:text="${tel.numero}"></span>
+                                    <form th:action="@{/telefono/eliminar/{id}/{pacienteId}(id=${tel.id}, pacienteId=${paciente.id})}"
+                                        method="post" class="inline-form">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                    </form>
+                                </li>
+                            </ul>
+
+                            <form th:action="@{/telefono/agregar/{pacienteId}(pacienteId=${paciente.id})}" method="post" class="phone-add-form">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="text" name="numero" class="form-input" placeholder="Nuevo teléfono">
+                                <button type="submit" class="btn btn-sm btn-primary">Agregar</button>
+                            </form>
+                        </div>
+                        
                     </div>
                 </div>
             </div>

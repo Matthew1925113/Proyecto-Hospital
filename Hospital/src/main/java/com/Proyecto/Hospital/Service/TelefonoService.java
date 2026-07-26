@@ -14,6 +14,10 @@ public class TelefonoService {
     @Autowired
     private PacienteService pacienteService;
 
+    public void eliminarTelefono(Long id) {
+        repository.deleteById(id);
+    }
+
     public void agregarTelefono(Long pacienteId, String numero) {
         Paciente paciente = pacienteService.ObtenerPaciente(pacienteId);
         if (paciente == null) {
