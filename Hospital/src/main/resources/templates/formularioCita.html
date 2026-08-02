@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Cita</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="navbar">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
+                <nav class="navbar-nav">
+                    <a class="nav-link" th:href="@{/citas}">Mis Citas</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Nueva Cita</h1>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                        <form th:action="@{/citas/reservar}" method="post">
+                            <div class="form-group">
+                                <label for="medicoId">Médico</label>
+                                <select id="medicoId" name="medicoId" class="form-input" required>
+                                    <option value="">Seleccione un médico</option>
+                                    <option th:each="medico : ${medicos}"
+                                            th:value="${medico.id}"
+                                            th:text="${medico.nombre} + ' ' + ${medico.apellido} + ' - ' + ${medico.especialidad}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fechaStr">Fecha</label>
+                                <input type="date" id="fechaStr" name="fechaStr" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="horaStr">Hora</label>
+                                <input type="time" id="horaStr" name="horaStr" class="form-input" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Reservar</button>
+                            <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

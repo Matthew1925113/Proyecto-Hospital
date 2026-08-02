@@ -7,16 +7,51 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+    <header class="navbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
+            <nav class="navbar-nav">
+                <a class="nav-link" th:href="@{/inicio}">Inicio</a>
+            </nav>
+        </div>
+    </header>
+
     <div class="page-wrapper">
         <main class="main-content" role="main">
             <div class="container">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h1>Gestión de Citas</h1>
-                        <p>Sección para agendar y consultar citas.</p>
-                        <a th:href="@{/inicio}" class="btn btn-primary">Volver al inicio</a>
-                    </div>
-                </div>
+                <a th:href="@{/citas/nueva}" class="btn btn-primary">Nueva Cita</a>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Médico</th>
+                            <th>Especialidad</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(citas)}">
+                            <td colspan="6" class="text-center">No hay citas registradas</td>
+                        </tr>
+
+                        <tr th:each="cita : ${citas}">
+                            <td th:text="${cita.medico.nombre} + ' ' + ${cita.medico.apellido}"></td>
+                            <td th:text="${cita.medico.especialidad}"></td>
+                            <td th:text="${cita.fecha}"></td>
+                            <td th:text="${cita.hora}"></td>
+                            <td>
+                                <span th:text="${cita.estado}"></span>
+                            </td>
+                            <td>
+                                <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}" th:href="@{/citas/confirmar/{id}(id=${cita.id})}" class="btn btn-success">Confirmar</a>
+                                <a th:if="${cita.estado != 'CANCELADA'}" th:href="@{/citas/cancelar/{id}(id=${cita.id})}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">Cancelar</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </main>
     </div>

@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 @Controller
@@ -30,7 +31,13 @@ public class CitaController {
         if (usuario == null) {
             return "redirect:/login";
         }
-        model.addAttribute("citas", citaService.ListarPorUsuario(usuario.getId()));
+
+        if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
+            model.addAttribute("citas", citaService.listarTodos());
+        } else {
+            model.addAttribute("citas", citaService.ListarPorUsuario(usuario.getId()));
+        }
+        model.addAttribute("usuario", usuario);
         return "citas";
     }
 
@@ -62,5 +69,36 @@ public class CitaController {
         }
 
     }
+
+    @GetMapping("/citas/cancelar/{id}")
+    public String cancelarCita(@PathVariable Long id, Model model, Principal principal) {
+        Usuario usuario = usuarioRepository.findByEmail(principal.getName()).orElse(null);
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+        String mensaje = citaService.Cancelar(id, usuario);
+        if(mensaje.equals("Cita Cancelada")) {
+            return "redirect:/citas";
+        } else {
+            model.addAttribute("error", mensaje);
+            return "formularioCita";
+        }
+    }
+
+    @GetMapping("/citas/confirmar/{id}")
+    public String confirmarCita(@PathVariable Long id, Model model, Principal principal) {
+        Usuario usuario = usuarioRepository.findByEmail(principal.getName()).orElse(null);
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+        String mensaje = citaService.Confirmar(id, usuario);
+        if(mensaje.equals("Cita Confirmada")) {
+            return "redirect:/citas";
+        } else {
+            model.addAttribute("error", mensaje);
+            return "formularioCita";
+        }
+    }
+
 }
 
