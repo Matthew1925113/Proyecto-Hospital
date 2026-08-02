@@ -54,9 +54,17 @@ public class MedicoController {
     }
 
     @GetMapping({"/eliminarMedico", "/EliminarMedico"})
-    public String deleteMedico(@RequestParam Long id) {
-        service.EliminarMedico(id);
-        return "redirect:/listaMedicos";
+    public String deleteMedico(@RequestParam Long id, Model model) {    
+        String mensaje = service.EliminarMedico(id);
+        if (mensaje.equals("El medico ha sido eliminado correctamente")) {
+            return "redirect:/listaMedicos";
+        }
+        else {
+            model.addAttribute("error", mensaje);
+            model.addAttribute("medicos", service.ListarMedicos());
+            return "listaMedicos";
+        }
+        
     }
 
     @GetMapping("/api/medicos")

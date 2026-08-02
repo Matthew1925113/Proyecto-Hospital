@@ -23,7 +23,7 @@
                         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                             <a class="nav-link" th:href="@{/pacienteNuevo}">Nuevo Paciente</a>
                         </li>
-                        <li class="nav-item" sec:authorize="hasRole('USUARIO')">
+                        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','USUARIO')">
                             <a class="nav-link" th:href="@{/citas}">Citas</a>
                         </li>
                         <li class="nav-item" sec:authorize="hasRole('USUARIO')">

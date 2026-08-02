@@ -8,17 +8,128 @@
 </head>
 <body>
     <div class="page-wrapper">
+        <header class="navbar" role="banner">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
+                <nav class="navbar-nav" aria-label="Main navigation">
+                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
+                    <a class="nav-link" th:href="@{/citas/nueva}">Nueva Cita</a>
+                    <form th:action="@{/logout}" method="post" class="inline-form">
+                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
         <main class="main-content" role="main">
             <div class="container">
+                <div class="page-header">
+                    <h1>Gestión de Citas</h1>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <div th:if="${usuario.rol == 'ADMIN'}" class="card" style="margin-bottom: 1.5rem;">
+                    <div class="card-header">Filtrar citas</div>
+                    <div class="card-body">
+                        <form th:action="@{/citas}" method="get">
+                            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select id="estado" name="estado" class="form-input">
+                                        <option value="">Todos</option>
+                                        <option value="PENDIENTE">Pendiente</option>
+                                        <option value="CONFIRMADA">Confirmada</option>
+                                        <option value="CANCELADA">Cancelada</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
+                                    <label for="medicoIdFiltro" class="form-label">Médico</label>
+                                    <select id="medicoIdFiltro" name="medicoId" class="form-input">
+                                        <option value="">Todos</option>
+                                        <option th:each="m : ${medicos}" th:value="${m.id}"
+                                                th:text="${m.nombre} + ' ' + ${m.apellido}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
+                                    <label for="especialidad" class="form-label">Especialidad</label>
+                                    <input type="text" id="especialidad" name="especialidad" class="form-input"
+                                           placeholder="Ej: Cardiología">
+                                </div>
+
+                                <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
+                                    <label for="fechaDesdeStr" class="form-label">Desde</label>
+                                    <input type="date" id="fechaDesdeStr" name="fechaDesdeStr" class="form-input">
+                                </div>
+
+                                <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
+                                    <label for="fechaHastaStr" class="form-label">Hasta</label>
+                                    <input type="date" id="fechaHastaStr" name="fechaHastaStr" class="form-input">
+                                </div>
+
+                                <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
+                                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                                    <a th:href="@{/citas}" class="btn btn-outline">Limpiar</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card">
-                    <div class="card-body text-center">
-                        <h1>Gestión de Citas</h1>
-                        <p>Sección para agendar y consultar citas.</p>
-                        <a th:href="@{/inicio}" class="btn btn-primary">Volver al inicio</a>
+                    <div class="card-body p-0">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Médico</th>
+                                        <th>Especialidad</th>
+                                        <th>Fecha</th>
+                                        <th>Hora</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(citas)}">
+                                        <td colspan="7" class="text-center" style="padding: 3rem;">No hay citas registradas</td>
+                                    </tr>
+
+                                    <tr th:each="cita : ${citas}">
+                                        <td th:text="${cita.usuario.nombre}"></td>
+                                        <td th:text="${cita.medico.nombre} + ' ' + ${cita.medico.apellido}"></td>
+                                        <td th:text="${cita.medico.especialidad}"></td>
+                                        <td th:text="${cita.fecha}"></td>
+                                        <td th:text="${cita.hora}"></td>
+                                        <td>
+                                            <span th:text="${cita.estado}"></span>
+                                        </td>
+                                        <td>
+                                            <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
+                                               th:href="@{/citas/confirmar/{id}(id=${cita.id})}"
+                                               class="btn btn-sm btn-primary">Confirmar</a>
+                                            <a th:if="${cita.estado != 'CANCELADA'}"
+                                               th:href="@{/citas/cancelar/{id}(id=${cita.id})}"
+                                               class="btn btn-sm btn-danger"
+                                               onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">Cancelar</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <footer class="footer">
+            <div class="container">
+                Hospital - Sistema de Gestión
+            </div>
+        </footer>
     </div>
 </body>
 </html>

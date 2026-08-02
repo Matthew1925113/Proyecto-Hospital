@@ -90,11 +90,66 @@ public class CitaService {
         cita.setFecha(fecha);
         cita.setHora(hora);
         cita.setEstado("PENDIENTE");
+        cita.setFechaCreacion(LocalDateTime.now());
         citaRepository.save(cita);
         return "Cita Reservada";
     }
 
+    @Transactional
+    public String Cancelar(Long citaId, Usuario usuario) {
+        Optional<Cita> citaOpt = citaRepository.findById(citaId);
+        if (citaOpt.isEmpty()) {
+            return "Error: no existe la cita";
+        }
 
+        Cita cita = citaOpt.get();
+        if ("CANCELADA".equals(cita.getEstado())) {
+            return "Error: la cita ya está cancelada";
+        }
+
+        boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
+        if (!esAdmin) {
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                return "Error: no tienes permisos para cancelar esta cita";
+            }
+        }
+
+        if (!esAdmin) {
+            LocalDateTime fechaHoraCita = LocalDateTime.of(cita.getFecha(), cita.getHora());
+            if (!fechaHoraCita.isAfter(LocalDateTime.now())) {
+                return "Error: no se puede cancelar citas en pasado";
+            }
+        }
+
+        cita.setEstado("CANCELADA");
+        citaRepository.save(cita);
+        return "Cita Cancelada";
+    }
+
+    @Transactional
+    public String Confirmar(Long citaId, Usuario usuario) {
+        if (!"ADMIN".equalsIgnoreCase(usuario.getRol())) {
+            return "Error: no tienes permisos para confirmar esta cita";
+        }
+
+        Optional<Cita> citaOpt = citaRepository.findById(citaId);
+        if (citaOpt.isEmpty()) {
+            return "Error: no existe la cita";
+        }
+
+        Cita cita = citaOpt.get();
+        if (!"PENDIENTE".equals(cita.getEstado())) {
+            return "Error: la cita no está pendiente";
+        }
+
+        cita.setEstado("CONFIRMADA");
+        citaRepository.save(cita);
+        return "Cita Confirmada";
+    }
+
+    public List<Cita> Filtrar(String estado, Long medicoId, String especialidad, LocalDate fechaDesde, LocalDate fechaHasta) {
+        return citaRepository.filtrar(estado, medicoId, especialidad, fechaDesde, fechaHasta);
+    }
 }
 
         
