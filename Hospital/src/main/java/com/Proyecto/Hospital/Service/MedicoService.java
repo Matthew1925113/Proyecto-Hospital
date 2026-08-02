@@ -1,7 +1,11 @@
 package com.Proyecto.Hospital.Service;
 
 import com.Proyecto.Hospital.Model.Medico;
+import com.Proyecto.Hospital.Model.Cita;
+
 import com.Proyecto.Hospital.Repository.MedicoRepository;
+import com.Proyecto.Hospital.Repository.CitaRepository;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -9,9 +13,11 @@ import java.util.List;
 public class MedicoService {
     
     private final MedicoRepository repository;
+    private final CitaRepository citaRepository;
 
-    public MedicoService(MedicoRepository repository) {
+    public MedicoService(MedicoRepository repository, CitaRepository citaRepository) {
         this.repository = repository;
+        this.citaRepository = citaRepository;
     }
     
     public List<Medico> ListarMedicos() {
@@ -45,7 +51,12 @@ public class MedicoService {
         return "El medico ha sido guardado correctamente";
     }
 
-    public void EliminarMedico(Long id) {
+    public String EliminarMedico(Long id) {
+        List<Cita> citas = citaRepository.findByMedicoId(id);
+        if (!citas.isEmpty()) {
+            return "No se puede eliminar el medico porque tiene citas asociadas";
+        }
         repository.deleteById(id);
+        return "El medico ha sido eliminado correctamente";
     }
 }

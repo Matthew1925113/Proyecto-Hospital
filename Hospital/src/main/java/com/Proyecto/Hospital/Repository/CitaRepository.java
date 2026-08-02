@@ -27,4 +27,6 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
                     @Param("especialidad") String especialidad,
                     @Param("fechaDesde") LocalDate fechaDesde,
                     @Param("fechaHasta") LocalDate fechaHasta);
+
+    List<Cita> findByMedicoId(Long medicoId);
 }
