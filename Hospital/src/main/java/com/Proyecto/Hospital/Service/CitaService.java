@@ -146,7 +146,9 @@ public class CitaService {
         return "Cita Confirmada";
     }
 
-
+    public List<Cita> Filtrar(String estado, Long medicoId, String especialidad, LocalDate fechaDesde, LocalDate fechaHasta) {
+        return citaRepository.filtrar(estado, medicoId, especialidad, fechaDesde, fechaHasta);
+    }
 }
 
         

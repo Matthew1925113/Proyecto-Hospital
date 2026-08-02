@@ -19,7 +19,51 @@
     <div class="page-wrapper">
         <main class="main-content" role="main">
             <div class="container">
-                <a th:href="@{/citas/nueva}" class="btn btn-primary">Nueva Cita</a>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <a th:href="@{/citas/nueva}" class="btn btn-primary">Nueva Cita</a>
+                </div>
+
+                <form th:if="${usuario.rol == 'ADMIN'}" th:action="@{/citas}" method="get" class="filter-form"
+                      style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; padding: 1rem; background: var(--surface); border-radius: var(--radius);">
+                    <div class="form-group" style="margin: 0;">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select id="estado" name="estado" class="form-input">
+                            <option value="">Todos</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="CONFIRMADA">Confirmada</option>
+                            <option value="CANCELADA">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label for="medicoIdFiltro" class="form-label">Médico</label>
+                        <select id="medicoIdFiltro" name="medicoId" class="form-input">
+                            <option value="">Todos</option>
+                            <option th:each="m : ${medicos}" th:value="${m.id}"
+                                    th:text="${m.nombre} + ' ' + ${m.apellido}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label for="especialidad" class="form-label">Especialidad</label>
+                        <input type="text" id="especialidad" name="especialidad" class="form-input"
+                               placeholder="Ej: Cardiología">
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label for="fechaDesdeStr" class="form-label">Desde</label>
+                        <input type="date" id="fechaDesdeStr" name="fechaDesdeStr" class="form-input">
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label for="fechaHastaStr" class="form-label">Hasta</label>
+                        <input type="date" id="fechaHastaStr" name="fechaHastaStr" class="form-input">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a th:href="@{/citas}" class="btn btn-outline">Limpiar</a>
+                </form>
+
                 <table class="table">
                     <thead>
                         <tr>
