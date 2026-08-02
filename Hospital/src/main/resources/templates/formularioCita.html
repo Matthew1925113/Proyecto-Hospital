@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,25 +8,32 @@
 </head>
 <body>
     <div class="page-wrapper">
-        <header class="navbar">
+        <header class="navbar" role="banner">
             <div class="container">
                 <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
-                <nav class="navbar-nav">
+                <nav class="navbar-nav" aria-label="Main navigation">
+                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
                     <a class="nav-link" th:href="@{/citas}">Mis Citas</a>
+                    <form th:action="@{/logout}" method="post" class="inline-form">
+                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+                    </form>
                 </nav>
             </div>
         </header>
 
-        <main class="main-content">
+        <main class="main-content" role="main">
             <div class="container">
+                <div class="page-header">
+                    <h1>Nueva Cita</h1>
+                </div>
+
                 <div class="card">
                     <div class="card-body">
-                        <h1>Nueva Cita</h1>
                         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
                         <form th:action="@{/citas/reservar}" method="post">
                             <div class="form-group">
-                                <label for="medicoId">Médico</label>
+                                <label for="medicoId" class="form-label">Médico</label>
                                 <select id="medicoId" name="medicoId" class="form-input" required>
                                     <option value="">Seleccione un médico</option>
                                     <option th:each="medico : ${medicos}"
@@ -37,22 +44,30 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="fechaStr">Fecha</label>
+                                <label for="fechaStr" class="form-label">Fecha</label>
                                 <input type="date" id="fechaStr" name="fechaStr" class="form-input" required>
                             </div>
 
                             <div class="form-group">
-                                <label for="horaStr">Hora</label>
+                                <label for="horaStr" class="form-label">Hora</label>
                                 <input type="time" id="horaStr" name="horaStr" class="form-input" required>
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Reservar</button>
-                            <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
+                            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                                <button type="submit" class="btn btn-primary">Reservar</button>
+                                <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
         </main>
+
+        <footer class="footer">
+            <div class="container">
+                Hospital - Sistema de Gestión
+            </div>
+        </footer>
     </div>
 </body>
 </html>

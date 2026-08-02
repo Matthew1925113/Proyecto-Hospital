@@ -90,6 +90,7 @@ public class CitaService {
         cita.setFecha(fecha);
         cita.setHora(hora);
         cita.setEstado("PENDIENTE");
+        cita.setFechaCreacion(LocalDateTime.now());
         citaRepository.save(cita);
         return "Cita Reservada";
     }
