@@ -74,13 +74,11 @@ public class NotificacionService {
             "Médico: %s %s\n" +
             "Fecha: %s\n" +
             "Hora: %s\n" +
-            "Motivo: %s\n" +
             "Por favor, agenda una nueva cita si es necesario.",
             cita.getMedico().getNombre(),
             cita.getMedico().getApellido(),
             cita.getFecha(),
-            cita.getHora(),
-            cita.getMotivoCancelacion() != null ? cita.getMotivoCancelacion() : "No especificado"
+            cita.getHora()
         );
         
         logger.info("ENVIANDO NOTIFICACIÓN DE CANCELACIÓN AL USUARIO: " + cita.getUsuario().getEmail());

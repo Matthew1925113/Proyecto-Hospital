@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Cita</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        .form-error {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -27,37 +41,80 @@
                     <h1>Nueva Cita</h1>
                 </div>
 
+                <div class="info-box">
+                    <strong>Instrucciones:</strong> Selecciona un médico, la fecha deseada y la hora. 
+                    Tu cita se creará en estado PENDIENTE hasta que el médico la confirme.
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger">
+                    <strong>Error:</strong> <span th:text="${error}"></span>
+                </div>
+
                 <div class="card">
                     <div class="card-body">
-                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-                        <form th:action="@{/citas/reservar}" method="post">
+                        <form th:action="@{/citas/reservar}" method="post" id="formCita">
                             <div class="form-group">
-                                <label for="medicoId" class="form-label">Médico</label>
+                                <label for="medicoId" class="form-label">
+                                    <span style="color: red;">*</span> Médico
+                                </label>
                                 <select id="medicoId" name="medicoId" class="form-input" required>
-                                    <option value="">Seleccione un médico</option>
+                                    <option value="">-- Seleccione un médico --</option>
                                     <option th:each="medico : ${medicos}"
                                             th:value="${medico.id}"
-                                            th:text="${medico.nombre} + ' ' + ${medico.apellido} + ' - ' + ${medico.especialidad}">
+                                            th:text="${medico.nombre} + ' ' + ${medico.apellido} + ' (' + ${medico.especialidad} + ')'">
                                     </option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label for="fechaStr" class="form-label">Fecha</label>
-                                <input type="date" id="fechaStr" name="fechaStr" class="form-input" required>
+                                <label for="fechaStr" class="form-label">
+                                    <span style="color: red;">*</span> Fecha
+                                </label>
+                                <input type="date" 
+                                       id="fechaStr" 
+                                       name="fechaStr" 
+                                       class="form-input" 
+                                       required>
+                                <small style="display: block; margin-top: 0.5rem; color: #666;">
+                                    Selecciona una fecha futura
+                                </small>
                             </div>
 
                             <div class="form-group">
-                                <label for="horaStr" class="form-label">Hora</label>
-                                <input type="time" id="horaStr" name="horaStr" class="form-input" required>
+                                <label for="horaStr" class="form-label">
+                                    <span style="color: red;">*</span> Hora
+                                </label>
+                                <input type="time" 
+                                       id="horaStr" 
+                                       name="horaStr" 
+                                       class="form-input" 
+                                       required>
+                                <small style="display: block; margin-top: 0.5rem; color: #666;">
+                                    Ingresa la hora deseada (HH:mm)
+                                </small>
                             </div>
 
-                            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                                <button type="submit" class="btn btn-primary">Reservar</button>
+                            <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
+                                <button type="submit" class="btn btn-primary">
+                                    Reservar Cita
+                                </button>
                                 <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem; background-color: #f5f5f5;">
+                    <div class="card-header">
+                        <strong>¿Qué sucede después de reservar?</strong>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Tu cita se crea en estado <strong>PENDIENTE</strong></li>
+                            <li>El médico recibe una notificación para confirmar o denegar</li>
+                            <li>Cuando el médico confirme, tu cita pasa a <strong>CONFIRMADA</strong></li>
+                            <li>Recibirás una notificación de la confirmación</li>
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -69,5 +126,30 @@
             </div>
         </footer>
     </div>
+
+    <script>
+        document.getElementById('formCita').addEventListener('submit', function(e) {
+            const medicoId = document.getElementById('medicoId').value;
+            const fecha = document.getElementById('fechaStr').value;
+            const hora = document.getElementById('horaStr').value;
+
+            if (!medicoId || !fecha || !hora) {
+                e.preventDefault();
+                alert('Por favor completa todos los campos requeridos');
+                return false;
+            }
+
+            // Validar que la fecha sea futura
+            const fechaSeleccionada = new Date(fecha + 'T00:00:00');
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+
+            if (fechaSeleccionada < hoy) {
+                e.preventDefault();
+                alert('La fecha debe ser en el futuro');
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>

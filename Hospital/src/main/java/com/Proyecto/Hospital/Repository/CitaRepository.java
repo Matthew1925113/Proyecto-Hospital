@@ -10,14 +10,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public interface CitaRepository extends JpaRepository<Cita, Long> {
-    
     List<Cita> findByUsuarioId(Long usuarioId);
 
-    @Query("SELECT c FROM Cita c WHERE c.medico.id = :medicoId AND c.fecha = :fecha AND c.hora = :hora AND c.estado IN ('PENDIENTE', 'CONFIRMADA')")
-    Optional<Cita> findActivaCitaByMedicoAndFechaAndHora(
+    @Query("SELECT c FROM Cita c WHERE c.medico.id = :medicoId AND c.fecha = :fecha AND c.hora = :hora AND c.estado != :estado")
+    Optional<Cita> findByMedicoIdAndFechaAndHoraAndEstadoNot(
         @Param("medicoId") Long medicoId,
         @Param("fecha") LocalDate fecha,
-        @Param("hora") LocalTime hora
+        @Param("hora") LocalTime hora,
+        @Param("estado") String estado
     );
 
     List<Cita> findByEstado(String estado);
@@ -37,22 +37,4 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     List<Cita> findByMedicoId(Long medicoId);
     
     List<Cita> findByMedicoIdAndEstado(Long medicoId, String estado);
-    
-    @Query("SELECT c FROM Cita c WHERE c.usuario.id = :usuarioId AND c.estado IN ('PENDIENTE', 'CONFIRMADA') " +
-           "AND c.fecha = :fecha AND c.hora = :hora")
-    Optional<Cita> findActivaCitaByUsuarioAndFechaAndHora(
-        @Param("usuarioId") Long usuarioId,
-        @Param("fecha") LocalDate fecha,
-        @Param("hora") LocalTime hora
-    );
-    
-    @Query("SELECT c FROM Cita c WHERE c.usuario.id = :usuarioId AND c.estado IN ('PENDIENTE', 'CONFIRMADA') " +
-           "AND ((c.fecha = :fecha AND c.hora >= :horaInicio AND c.hora < :horaFin) " +
-           "OR (c.fecha > :fecha))")
-    List<Cita> findActivaCitasByUsuarioAndFechaAndHoraRange(
-        @Param("usuarioId") Long usuarioId,
-        @Param("fecha") LocalDate fecha,
-        @Param("horaInicio") LocalTime horaInicio,
-        @Param("horaFin") LocalTime horaFin
-    );
 }
