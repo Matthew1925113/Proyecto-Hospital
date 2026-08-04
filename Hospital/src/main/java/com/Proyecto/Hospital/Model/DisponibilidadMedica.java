@@ -3,11 +3,10 @@ package com.Proyecto.Hospital.Model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-@Table(name = "disponibilidad_medica", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"medico_id", "fecha", "hora_inicio"})
-})
+@Table(name = "disponibilidad_medica")
 public class DisponibilidadMedica {
     
     @Id
@@ -18,16 +17,21 @@ public class DisponibilidadMedica {
     @JoinColumn(name = "medico_id", nullable = false)
     private Medico medico;
     
+    @Column(nullable = false)
     private LocalDate fecha;
+    
+    @Column(name = "hora_inicio", nullable = false)
     private LocalTime horaInicio;
+    
+    @Column(name = "hora_fin", nullable = false)
     private LocalTime horaFin;
     
-    @Column(nullable = false)
+    @Column(name = "activo", nullable = false)
     private Boolean activo = true;
     
-    private String descripcion;
-    
-    public DisponibilidadMedica() {}
+    // Constructores
+    public DisponibilidadMedica() {
+    }
     
     public DisponibilidadMedica(Medico medico, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
         this.medico = medico;
@@ -37,7 +41,7 @@ public class DisponibilidadMedica {
         this.activo = true;
     }
     
-    // Getters and Setters
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -86,16 +90,15 @@ public class DisponibilidadMedica {
         this.activo = activo;
     }
     
-    public String getDescripcion() {
-        return descripcion;
-    }
-    
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-    
-    // Utility method to check if a time is within this availability slot
-    public boolean contieneHora(LocalTime hora) {
-        return !hora.isBefore(this.horaInicio) && hora.isBefore(this.horaFin);
+    @Override
+    public String toString() {
+        return "DisponibilidadMedica{" +
+                "id=" + id +
+                ", medico=" + (medico != null ? medico.getId() : null) +
+                ", fecha=" + fecha +
+                ", horaInicio=" + horaInicio +
+                ", horaFin=" + horaFin +
+                ", activo=" + activo +
+                '}';
     }
 }

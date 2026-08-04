@@ -8,10 +8,10 @@
     <style>
         .badge {
             display: inline-block;
-            padding: 0.375rem 0.75rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
         .badge-pendiente {
             background-color: #fff3cd;
@@ -24,18 +24,6 @@
         .badge-cancelada {
             background-color: #f8d7da;
             color: #721c24;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .info-box {
-            background-color: #e3f2fd;
-            border-left: 4px solid #2196F3;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            border-radius: 4px;
         }
     </style>
 </head>
@@ -60,15 +48,10 @@
                     <h1>Gestión de Citas</h1>
                 </div>
 
-                <div th:if="${error}" class="alert alert-danger">
-                    <strong>Error:</strong> <span th:text="${error}"></span>
-                </div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                <!-- FILTRO PARA ADMIN -->
                 <div th:if="${usuario.rol == 'ADMIN'}" class="card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header">
-                        <strong>Filtrar citas (Vista Administrador)</strong>
-                    </div>
+                    <div class="card-header">Filtrar citas</div>
                     <div class="card-body">
                         <form th:action="@{/citas}" method="get">
                             <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
@@ -86,36 +69,25 @@
                                     <label for="medicoIdFiltro" class="form-label">Médico</label>
                                     <select id="medicoIdFiltro" name="medicoId" class="form-input">
                                         <option value="">Todos</option>
-                                        <option th:each="m : ${medicos}" 
-                                                th:value="${m.id}"
-                                                th:text="${m.nombre} + ' ' + ${m.apellido}">
-                                        </option>
+                                        <option th:each="m : ${medicos}" th:value="${m.id}"
+                                                th:text="${m.nombre} + ' ' + ${m.apellido}"></option>
                                     </select>
                                 </div>
 
                                 <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
                                     <label for="especialidad" class="form-label">Especialidad</label>
-                                    <input type="text" 
-                                           id="especialidad" 
-                                           name="especialidad" 
-                                           class="form-input"
+                                    <input type="text" id="especialidad" name="especialidad" class="form-input"
                                            placeholder="Ej: Cardiología">
                                 </div>
 
                                 <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
                                     <label for="fechaDesdeStr" class="form-label">Desde</label>
-                                    <input type="date" 
-                                           id="fechaDesdeStr" 
-                                           name="fechaDesdeStr" 
-                                           class="form-input">
+                                    <input type="date" id="fechaDesdeStr" name="fechaDesdeStr" class="form-input">
                                 </div>
 
                                 <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
                                     <label for="fechaHastaStr" class="form-label">Hasta</label>
-                                    <input type="date" 
-                                           id="fechaHastaStr" 
-                                           name="fechaHastaStr" 
-                                           class="form-input">
+                                    <input type="date" id="fechaHastaStr" name="fechaHastaStr" class="form-input">
                                 </div>
 
                                 <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
@@ -127,24 +99,13 @@
                     </div>
                 </div>
 
-                <!-- INFO BOX PARA USUARIO -->
-                <div th:if="${usuario.rol != 'ADMIN'}" class="info-box">
-                    <strong>Mis Citas:</strong> Aquí puedes ver todas tus citas reservadas. 
-                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
-                        <li><strong>PENDIENTE</strong> = Esperando confirmación del médico</li>
-                        <li><strong>CONFIRMADA</strong> = El médico confirmó tu cita</li>
-                        <li><strong>CANCELADA</strong> = La cita fue cancelada</li>
-                    </ul>
-                </div>
-
-                <!-- TABLA DE CITAS -->
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-container">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th th:if="${usuario.rol == 'ADMIN'}">Usuario</th>
+                                        <th>Usuario</th>
                                         <th>Médico</th>
                                         <th>Especialidad</th>
                                         <th>Fecha</th>
@@ -154,76 +115,35 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- MENSAJE VACÍO -->
                                     <tr th:if="${#lists.isEmpty(citas)}">
-                                        <td th:colspan="${usuario.rol == 'ADMIN' ? 8 : 7}" 
-                                            class="text-center" 
-                                            style="padding: 3rem;">
-                                            <strong>No hay citas registradas</strong>
-                                            <br>
-                                            <a th:href="@{/citas/nueva}" class="btn btn-primary" style="margin-top: 1rem;">
-                                                Crear Nueva Cita
-                                            </a>
-                                        </td>
+                                        <td colspan="7" class="text-center" style="padding: 3rem;">No hay citas registradas</td>
                                     </tr>
 
-                                    <!-- FILAS CON CITAS -->
                                     <tr th:each="cita : ${citas}">
-                                        <td th:if="${usuario.rol == 'ADMIN'}" th:text="${cita.usuario.nombre}"></td>
+                                        <td th:text="${cita.usuario.nombre}"></td>
                                         <td th:text="${cita.medico.nombre} + ' ' + ${cita.medico.apellido}"></td>
                                         <td th:text="${cita.medico.especialidad}"></td>
                                         <td th:text="${cita.fecha}"></td>
                                         <td th:text="${cita.hora}"></td>
                                         <td>
-                                            <span th:class="'badge ' + ('PENDIENTE' == ${cita.estado} ? 'badge-pendiente' : 'CONFIRMADA' == ${cita.estado} ? 'badge-confirmada' : 'badge-cancelada')"
-                                                  th:text="${cita.estado}">
-                                            </span>
+                                            <span th:if="${cita.estado == 'PENDIENTE'}" class="badge badge-pendiente" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="badge badge-confirmada" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CANCELADA'}" class="badge badge-cancelada" th:text="${cita.estado}"></span>
                                         </td>
                                         <td>
-                                            <div class="action-buttons">
-                                                <!-- CONFIRMAR (solo admin, solo si está pendiente) -->
-                                                <form th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
-                                                      th:action="@{/citas/confirmar/{id}(id=${cita.id})}"
-                                                      method="post"
-                                                      style="display: inline;">
-                                                    <button type="submit" 
-                                                            class="btn btn-sm btn-primary"
-                                                            onclick="return confirm('¿Confirmar esta cita?')">
-                                                        Confirmar
-                                                    </button>
-                                                </form>
-
-                                                <!-- CANCELAR (si no está cancelada) -->
-                                                <form th:if="${cita.estado != 'CANCELADA'}"
-                                                      th:action="@{/citas/cancelar/{id}(id=${cita.id})}"
-                                                      method="get"
-                                                      style="display: inline;">
-                                                    <button type="submit" 
-                                                            class="btn btn-sm btn-danger"
-                                                            onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
-                                                        Cancelar
-                                                    </button>
-                                                </form>
-
-                                                <!-- VER DETALLES -->
-                                                <a th:href="@{/citas/{id}(id=${cita.id})}"
-                                                   class="btn btn-sm btn-outline">
-                                                    Ver Detalles
-                                                </a>
-                                            </div>
+                                            <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
+                                               th:href="@{/citas/confirmar/{id}(id=${cita.id})}"
+                                               class="btn btn-sm btn-primary">Confirmar</a>
+                                            <a th:if="${cita.estado != 'CANCELADA'}"
+                                               th:href="@{/citas/cancelar/{id}(id=${cita.id})}"
+                                               class="btn btn-sm btn-danger"
+                                               onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">Cancelar</a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-
-                <!-- BOTÓN CREAR NUEVA CITA (para usuarios) -->
-                <div th:if="${usuario.rol != 'ADMIN'}" style="margin-top: 1.5rem; text-align: center;">
-                    <a th:href="@{/citas/nueva}" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-                        + Crear Nueva Cita
-                    </a>
                 </div>
             </div>
         </main>

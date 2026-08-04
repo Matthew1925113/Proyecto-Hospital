@@ -11,23 +11,43 @@ import java.util.Optional;
 
 public interface DisponibilidadMedicaRepository extends JpaRepository<DisponibilidadMedica, Long> {
     
-    List<DisponibilidadMedica> findByMedicoIdAndActivoTrue(Long medicoId);
-    
-    List<DisponibilidadMedica> findByMedicoIdAndFechaAndActivoTrue(Long medicoId, LocalDate fecha);
-    
+    /**
+     * Obtener disponibilidad por ID solo si está activa
+     */
     Optional<DisponibilidadMedica> findByIdAndActivoTrue(Long id);
     
-    @Query("SELECT d FROM DisponibilidadMedica d WHERE d.medico.id = :medicoId AND d.fecha = :fecha AND d.horaInicio = :hora AND d.activo = true")
-    Optional<DisponibilidadMedica> findByMedicoAndFechaAndHora(
+    /**
+     * Listar todas las disponibilidades activas de un médico
+     */
+    List<DisponibilidadMedica> findByMedicoIdAndActivoTrue(Long medicoId);
+    
+    /**
+     * Listar disponibilidades activas de un médico en una fecha específica
+     */
+    List<DisponibilidadMedica> findByMedicoIdAndFechaAndActivoTrue(Long medicoId, LocalDate fecha);
+    
+    /**
+     * Listar disponibilidades activas de un médico en un rango de fechas
+     */
+    @Query("SELECT d FROM DisponibilidadMedica d WHERE d.medico.id = :medicoId AND d.fecha >= :desde AND d.fecha <= :hasta AND d.activo = true ORDER BY d.fecha ASC, d.horaInicio ASC")
+    List<DisponibilidadMedica> findByMedicoIdAndFechaRangeAndActivoTrue(
         @Param("medicoId") Long medicoId,
-        @Param("fecha") LocalDate fecha,
-        @Param("hora") LocalTime hora
+        @Param("desde") LocalDate desde,
+        @Param("hasta") LocalDate hasta
     );
     
-    @Query("SELECT d FROM DisponibilidadMedica d WHERE d.medico.id = :medicoId AND d.fecha >= :fechaDesde AND d.fecha <= :fechaHasta AND d.activo = true")
-    List<DisponibilidadMedica> findByMedicoAndFechaRango(
+    /**
+     * Listar TODAS las disponibilidades activas (para cargar en formulario)
+     */
+    @Query("SELECT d FROM DisponibilidadMedica d WHERE d.activo = true ORDER BY d.fecha ASC, d.horaInicio ASC")
+    List<DisponibilidadMedica> findAllActivas();
+    
+    /**
+     * Obtener disponibilidades activas por médico en una fecha
+     */
+    @Query("SELECT d FROM DisponibilidadMedica d WHERE d.medico.id = :medicoId AND d.fecha = :fecha AND d.activo = true ORDER BY d.horaInicio ASC")
+    List<DisponibilidadMedica> findByMedicoAndFechaActivas(
         @Param("medicoId") Long medicoId,
-        @Param("fechaDesde") LocalDate fechaDesde,
-        @Param("fechaHasta") LocalDate fechaHasta
+        @Param("fecha") LocalDate fecha
     );
 }

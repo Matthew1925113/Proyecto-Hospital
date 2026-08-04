@@ -11,9 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class DisponibilidadMedicaService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DisponibilidadMedicaService.class);
     
     private final DisponibilidadMedicaRepository disponibilidadRepository;
     private final MedicoRepository medicoRepository;
@@ -25,44 +29,6 @@ public class DisponibilidadMedicaService {
         this.disponibilidadRepository = disponibilidadRepository;
         this.medicoRepository = medicoRepository;
         this.citaRepository = citaRepository;
-    }
-    
-    /**
-     * Crear un nuevo espacio de disponibilidad
-     */
-    @Transactional
-    public String crear(Long medicoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin, String descripcion) {
-        // Validar campos obligatorios
-        if (medicoId == null || fecha == null || horaInicio == null || horaFin == null) {
-            return "Error: faltan campos obligatorios";
-        }
-        
-        // Validar que el médico exista
-        Optional<Medico> medicoOpt = medicoRepository.findById(medicoId);
-        if (medicoOpt.isEmpty()) {
-            return "Error: el médico no existe";
-        }
-        
-        // Validar que horaInicio sea menor que horaFin
-        if (!horaInicio.isBefore(horaFin)) {
-            return "Error: la hora de inicio debe ser menor que la hora de fin";
-        }
-        
-        // Validar que la fecha no sea en el pasado
-        if (fecha.isBefore(LocalDate.now())) {
-            return "Error: no se puede crear disponibilidad en fechas pasadas";
-        }
-        
-        DisponibilidadMedica disponibilidad = new DisponibilidadMedica();
-        disponibilidad.setMedico(medicoOpt.get());
-        disponibilidad.setFecha(fecha);
-        disponibilidad.setHoraInicio(horaInicio);
-        disponibilidad.setHoraFin(horaFin);
-        disponibilidad.setDescripcion(descripcion);
-        disponibilidad.setActivo(true);
-        
-        disponibilidadRepository.save(disponibilidad);
-        return "Disponibilidad creada correctamente";
     }
     
     /**
@@ -87,23 +53,74 @@ public class DisponibilidadMedicaService {
     }
     
     /**
-     * Desactivar una disponibilidad (cuando se elimina lógicamente)
-     * RN9: No se elimina físicamente si tiene citas
+     * Actualizar una disponibilidad específica
+     */
+    @Transactional
+    public String actualizar(Long disponibilidadId, LocalTime horaInicio, LocalTime horaFin, Boolean activo) {
+        Optional<DisponibilidadMedica> dispOpt = disponibilidadRepository.findById(disponibilidadId);
+        if (dispOpt.isEmpty()) {
+            return "Error: la disponibilidad no existe";
+        }
+
+        DisponibilidadMedica disponibilidad = dispOpt.get();
+        disponibilidad.setHoraInicio(horaInicio);
+        disponibilidad.setHoraFin(horaFin);
+        disponibilidad.setActivo(activo);
+        
+        disponibilidadRepository.save(disponibilidad);
+        logger.info("Disponibilidad {} actualizada", disponibilidadId);
+        
+        return "Disponibilidad actualizada correctamente";
+    }
+    
+    /**
+     * Actualizar disponibilidades en un rango de fechas (sin afectar otros días)
+     */
+    @Transactional
+    public String actualizarRango(Long medicoId, LocalDate fechaDesde, LocalDate fechaHasta, 
+                                 LocalTime horaInicio, LocalTime horaFin, Boolean activo) {
+        if (!medicoRepository.existsById(medicoId)) {
+            return "Error: el médico no existe";
+        }
+
+        LocalDate fechaActual = fechaDesde;
+        int actualizadas = 0;
+
+        while (!fechaActual.isAfter(fechaHasta)) {
+            List<DisponibilidadMedica> disponibilidades = 
+                disponibilidadRepository.findByMedicoIdAndFechaAndActivoTrue(medicoId, fechaActual);
+            
+            for (DisponibilidadMedica disp : disponibilidades) {
+                disp.setHoraInicio(horaInicio);
+                disp.setHoraFin(horaFin);
+                disp.setActivo(activo);
+                disponibilidadRepository.save(disp);
+                actualizadas++;
+            }
+
+            fechaActual = fechaActual.plusDays(1);
+        }
+
+        logger.info("Se actualizaron {} disponibilidades para médico {} entre {} y {}", 
+            actualizadas, medicoId, fechaDesde, fechaHasta);
+        
+        return "Se actualizaron " + actualizadas + " espacios de disponibilidad";
+    }
+    
+    /**
+     * Desactivar una disponibilidad específica
      */
     @Transactional
     public String desactivar(Long disponibilidadId) {
-        Optional<DisponibilidadMedica> disponibilidadOpt = disponibilidadRepository.findById(disponibilidadId);
-        if (disponibilidadOpt.isEmpty()) {
+        Optional<DisponibilidadMedica> dispOpt = disponibilidadRepository.findById(disponibilidadId);
+        if (dispOpt.isEmpty()) {
             return "Error: la disponibilidad no existe";
         }
-        
-        DisponibilidadMedica disponibilidad = disponibilidadOpt.get();
-        
-        // Verificar si tiene citas activas
-        // (En una implementación real, habría una FK en Cita hacia DisponibilidadMedica)
-        
+
+        DisponibilidadMedica disponibilidad = dispOpt.get();
         disponibilidad.setActivo(false);
         disponibilidadRepository.save(disponibilidad);
+        logger.info("Disponibilidad {} desactivada", disponibilidadId);
         
         return "Disponibilidad desactivada";
     }
@@ -113,24 +130,14 @@ public class DisponibilidadMedicaService {
      */
     @Transactional
     public String eliminar(Long disponibilidadId) {
-        Optional<DisponibilidadMedica> disponibilidadOpt = disponibilidadRepository.findById(disponibilidadId);
-        if (disponibilidadOpt.isEmpty()) {
+        Optional<DisponibilidadMedica> dispOpt = disponibilidadRepository.findById(disponibilidadId);
+        if (dispOpt.isEmpty()) {
             return "Error: la disponibilidad no existe";
         }
-        
-        DisponibilidadMedica disponibilidad = disponibilidadOpt.get();
-        
-        // Verificar si tiene citas
-        long citasAsociadas = citaRepository.findAll().stream()
-            .filter(c -> c.getDisponibilidad().getId().equals(disponibilidadId))
-            .filter(c -> !c.esCancelada())
-            .count();
-        
-        if (citasAsociadas > 0) {
-            return "Error: no se puede eliminar una disponibilidad que tiene citas asociadas";
-        }
-        
+
         disponibilidadRepository.deleteById(disponibilidadId);
+        logger.info("Disponibilidad {} eliminada", disponibilidadId);
+        
         return "Disponibilidad eliminada";
     }
 }
