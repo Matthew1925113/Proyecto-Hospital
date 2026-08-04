@@ -5,25 +5,34 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 
-
 @Entity
+@Table(name = "citas")
 public class Cita {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "medico_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "medico_id", nullable = false)
     private Medico medico;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "disponibilidad_id", nullable = false)
+    private DisponibilidadMedica disponibilidad;
 
     private LocalDate fecha;
     private LocalTime hora;
-    private String estado;
+    
+    @Column(nullable = false)
+    private String estado; // PENDIENTE, CONFIRMADA, CANCELADA
+    
     private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCancelacion;
+    private String motivoCancelacion;
 
     public Cita() {
     }
@@ -52,6 +61,14 @@ public class Cita {
         this.medico = medico;
     }
 
+    public DisponibilidadMedica getDisponibilidad() {
+        return disponibilidad;
+    }
+
+    public void setDisponibilidad(DisponibilidadMedica disponibilidad) {
+        this.disponibilidad = disponibilidad;
+    }
+
     public LocalDate getFecha() {
         return fecha;
     }
@@ -73,6 +90,9 @@ public class Cita {
     }
 
     public void setEstado(String estado) {
+        if (!estado.matches("PENDIENTE|CONFIRMADA|CANCELADA")) {
+            throw new IllegalArgumentException("Estado inválido: " + estado);
+        }
         this.estado = estado;
     }
 
@@ -84,4 +104,36 @@ public class Cita {
         this.fechaCreacion = fechaCreacion;
     }
 
+    public LocalDateTime getFechaCancelacion() {
+        return fechaCancelacion;
+    }
+
+    public void setFechaCancelacion(LocalDateTime fechaCancelacion) {
+        this.fechaCancelacion = fechaCancelacion;
+    }
+
+    public String getMotivoCancelacion() {
+        return motivoCancelacion;
+    }
+
+    public void setMotivoCancelacion(String motivoCancelacion) {
+        this.motivoCancelacion = motivoCancelacion;
+    }
+
+    // Métodos útiles
+    public boolean esPendiente() {
+        return "PENDIENTE".equals(this.estado);
+    }
+
+    public boolean esConfirmada() {
+        return "CONFIRMADA".equals(this.estado);
+    }
+
+    public boolean esCancelada() {
+        return "CANCELADA".equals(this.estado);
+    }
+
+    public boolean esActiva() {
+        return "PENDIENTE".equals(this.estado) || "CONFIRMADA".equals(this.estado);
+    }
 }

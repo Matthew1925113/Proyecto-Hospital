@@ -32,7 +32,7 @@ public class SecurityConfig  {
                 .requestMatchers("/inicio").hasAnyRole("ADMIN", "USUARIO")
                 .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", "/eliminarPaciente", "/EliminarPaciente", "/medicos", "/listaUsuarios", "/Usuarios", "/nuevoUsuario", "/FormularioUsuario", "/EditarUsuario/**", "/editarUsuario/**", "/GuardarUsuario", "/eliminarUsuario", "/EliminarUsuario").hasRole("ADMIN")
                 .requestMatchers("/citas/**", "/perfil", "/actualizarPerfil").hasAnyRole("ADMIN", "USUARIO")
-                .anyRequest().hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
