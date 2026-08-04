@@ -13,9 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 @Service
 public class CitaService {
+
+    // Acepta "7:00" y "07:00" por igual (el guion opcional del minuto también admite 1 o 2 dígitos)
+    private static final DateTimeFormatter FORMATO_HORA = new DateTimeFormatterBuilder()
+            .appendPattern("H:mm")
+            .toFormatter();
+
     private final CitaRepository citaRepository;
     private final MedicoRepository medicoRepository;
     
@@ -36,8 +44,8 @@ public class CitaService {
         String[] horas = disponibilidadHorario.split(",");
         for (String horaStr : horas) {
             String[] rango = horaStr.trim().split("-");
-            LocalTime inicio = LocalTime.parse(rango[0].trim());
-            LocalTime fin = LocalTime.parse(rango[1].trim());
+            LocalTime inicio = LocalTime.parse(rango[0].trim(), FORMATO_HORA);
+            LocalTime fin = LocalTime.parse(rango[1].trim(), FORMATO_HORA);
             if (!hora.isBefore(inicio) && hora.isBefore(fin)) {
                 return true;
             }
@@ -148,9 +156,8 @@ public class CitaService {
     }
 
     public List<Cita> Filtrar(String estado, Long medicoId, String especialidad, LocalDate fechaDesde, LocalDate fechaHasta) {
+        if (estado != null && estado.isBlank()) estado = null;
+        if (especialidad != null && especialidad.isBlank()) especialidad = null;
         return citaRepository.filtrar(estado, medicoId, especialidad, fechaDesde, fechaHasta);
     }
 }
-
-        
-

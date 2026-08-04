@@ -29,7 +29,7 @@ public class CitaController {
         this.usuarioRepository = usuarioRepository;
     }
     @GetMapping("/citas")
-    public String listarCitas(   @RequestParam(required = false) String estado,
+    public String listarCitas(  @RequestParam(required = false) String estado,
                                 @RequestParam(required = false) Long medicoId,
                                 @RequestParam(required = false) String especialidad,
                                 @RequestParam(required = false) String fechaDesdeStr,
