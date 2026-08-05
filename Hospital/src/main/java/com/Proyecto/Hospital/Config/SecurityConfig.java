@@ -27,12 +27,12 @@ public class SecurityConfig  {
         http
             .authorizeHttpRequests(auth -> auth
                 // Rutas públicas
-                .requestMatchers("/login", "/acceso-denegado", "/error", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                .requestMatchers("/login", "/acceso-denegado", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 // Rutas privadas
                 .requestMatchers("/inicio").hasAnyRole("ADMIN", "USUARIO")
                 .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", "/eliminarPaciente", "/EliminarPaciente", "/medicos", "/listaUsuarios", "/Usuarios", "/nuevoUsuario", "/FormularioUsuario", "/EditarUsuario/**", "/editarUsuario/**", "/GuardarUsuario", "/eliminarUsuario", "/EliminarUsuario").hasRole("ADMIN")
                 .requestMatchers("/citas/**", "/perfil", "/actualizarPerfil").hasAnyRole("ADMIN", "USUARIO")
-                .anyRequest().hasRole("ADMIN")
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -49,10 +49,6 @@ public class SecurityConfig  {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));
 
             return http.build();
-
-
-
-
     }
     
 }

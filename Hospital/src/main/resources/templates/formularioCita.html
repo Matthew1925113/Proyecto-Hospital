@@ -5,6 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Cita</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        .medico-card {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2196F3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .medico-card:hover {
+            background-color: #f0f7ff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .medico-card.active {
+            background-color: #e3f2fd;
+            border-left-color: #1976d2;
+        }
+        .medico-card strong {
+            display: block;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        .medico-card small {
+            color: #666;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #2196F3;
+        }
+        .horario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .horario-option {
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .horario-option:hover {
+            border-color: #2196F3;
+            background-color: #e3f2fd;
+        }
+        .horario-option.selected {
+            border-color: #1976d2;
+            background-color: #e3f2fd;
+            font-weight: 600;
+        }
+        .horario-option.inactivo {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #ccc;
+            background-color: #f5f5f5;
+        }
+        .horario-tiempo {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+        .horario-disponible {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        .no-horarios {
+            padding: 2rem;
+            text-align: center;
+            color: #999;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .medicos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .fecha-selector {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -24,37 +124,53 @@
         <main class="main-content" role="main">
             <div class="container">
                 <div class="page-header">
-                    <h1>Nueva Cita</h1>
+                    <h1>Reservar Nueva Cita</h1>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger">
+                    <strong>Error:</strong> <span th:text="${error}"></span>
                 </div>
 
                 <div class="card">
                     <div class="card-body">
-                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-                        <form th:action="@{/citas/reservar}" method="post">
-                            <div class="form-group">
-                                <label for="medicoId" class="form-label">Médico</label>
-                                <select id="medicoId" name="medicoId" class="form-input" required>
-                                    <option value="">Seleccione un médico</option>
-                                    <option th:each="medico : ${medicos}"
-                                            th:value="${medico.id}"
-                                            th:text="${medico.nombre} + ' ' + ${medico.apellido} + ' - ' + ${medico.especialidad}">
-                                    </option>
-                                </select>
+                        <form th:action="@{/citas/reservar}" method="post" id="formCita">
+                            
+                            <!-- PASO 1: SELECCIONAR FECHA -->
+                            <h3 class="section-title">Paso 1: Selecciona una Fecha</h3>
+                            <div class="fecha-selector">
+                                <div class="form-group">
+                                    <label for="fechaSeleccionada" class="form-label">
+                                        <span style="color: red;">*</span> Fecha
+                                    </label>
+                                    <input type="date" 
+                                           id="fechaSeleccionada" 
+                                           class="form-input"
+                                           required>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="fechaStr" class="form-label">Fecha</label>
-                                <input type="date" id="fechaStr" name="fechaStr" class="form-input" required>
+                            <!-- PASO 2: SELECCIONAR MÉDICO -->
+                            <h3 class="section-title">Paso 2: Selecciona un Médico</h3>
+                            <div class="medicos-grid" id="medicosContainer">
+                                <div th:each="medico : ${medicos}" 
+                                     class="medico-card"
+                                     th:onclick="'seleccionarMedico(this, ' + ${medico.id} + ')'">
+                                    <strong th:text="${medico.nombre} + ' ' + ${medico.apellido}"></strong>
+                                    <small th:text="${medico.especialidad}"></small>
+                                    <small style="display: block; margin-top: 0.25rem;" th:text="'📞 ' + ${medico.telefono}"></small>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="horaStr" class="form-label">Hora</label>
-                                <input type="time" id="horaStr" name="horaStr" class="form-input" required>
+                            <!-- PASO 3: SELECCIONAR HORA -->
+                            <div id="horariosDiv" style="display: none;">
+                                <h3 class="section-title">Paso 3: Selecciona la Hora de Inicio de tu Cita</h3>
+                                <div id="horariosContent"></div>
                             </div>
 
-                            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                                <button type="submit" class="btn btn-primary">Reservar</button>
+                            <input type="hidden" id="disponibilidadId" name="disponibilidadId" value="">
+
+                            <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
+                                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Reservar Cita</button>
                                 <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
                             </div>
                         </form>
@@ -69,5 +185,133 @@
             </div>
         </footer>
     </div>
+
+    <script th:inline="javascript">
+        let medicoSeleccionado = null;
+        let fechaSeleccionada = null;
+        let disponibilidadSeleccionada = null;
+
+        const todasDisponibilidades = /*[[${disponibilidades}]]*/ [];
+
+        // Establecer fecha mínima a hoy
+        document.getElementById('fechaSeleccionada').min = new Date().toISOString().split('T')[0];
+
+        // Al cambiar la fecha, limpiar selecciones
+        document.getElementById('fechaSeleccionada').addEventListener('change', function(e) {
+            fechaSeleccionada = e.target.value;
+            medicoSeleccionado = null;
+            disponibilidadSeleccionada = null;
+            
+            document.querySelectorAll('.medico-card').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            document.getElementById('horariosDiv').style.display = 'none';
+            document.getElementById('disponibilidadId').value = '';
+            actualizarBoton();
+            
+            console.log("Fecha seleccionada:", fechaSeleccionada);
+        });
+
+        function seleccionarMedico(element, medicoId) {
+            if (!fechaSeleccionada) {
+                alert('Por favor selecciona una fecha primero');
+                return;
+            }
+
+            console.log("Seleccionando médico:", medicoId, "para fecha:", fechaSeleccionada);
+            
+            document.querySelectorAll('.medico-card').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            element.classList.add('active');
+            medicoSeleccionado = medicoId;
+
+            cargarHorarios(medicoId, fechaSeleccionada);
+        }
+
+        function cargarHorarios(medicoId, fecha) {
+            console.log("Cargando horarios para médico:", medicoId, "en fecha:", fecha);
+            console.log("Total disponibilidades:", todasDisponibilidades.length);
+            
+            const dispDelMedicoYFecha = todasDisponibilidades.filter(d => {
+                return d.medico && d.medico.id === medicoId && d.fecha === fecha && d.activo === true;
+            });
+
+            console.log("Disponibilidades filtradas:", dispDelMedicoYFecha.length);
+
+            if (dispDelMedicoYFecha.length === 0) {
+                document.getElementById('horariosDiv').style.display = 'block';
+                document.getElementById('horariosContent').innerHTML = 
+                    '<div class="no-horarios">Este médico no tiene horarios disponibles para esta fecha.</div>';
+                disponibilidadSeleccionada = null;
+                actualizarBoton();
+                return;
+            }
+
+            let html = '<div class="horario-grid">';
+            
+            dispDelMedicoYFecha.forEach(disp => {
+                const estaActiva = disp.activo === true;
+                html += '<div class="horario-option ' + (estaActiva ? '' : 'inactivo') + '" ';
+                
+                if (estaActiva) {
+                    html += 'onclick="seleccionarHorario(this, ' + disp.id + ')">';
+                } else {
+                    html += 'style="cursor: not-allowed;">';
+                }
+                
+                html += '<div class="horario-tiempo">' + disp.horaInicio + '</div>';
+                html += '<div class="horario-disponible">' + disp.horaFin + '</div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            document.getElementById('horariosDiv').style.display = 'block';
+            document.getElementById('horariosContent').innerHTML = html;
+            disponibilidadSeleccionada = null;
+            actualizarBoton();
+        }
+
+        function seleccionarHorario(element, disponibilidadId) {
+            console.log("Seleccionando disponibilidad:", disponibilidadId);
+            
+            document.querySelectorAll('.horario-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            disponibilidadSeleccionada = disponibilidadId;
+            document.getElementById('disponibilidadId').value = disponibilidadId;
+            
+            console.log("Input value set to:", document.getElementById('disponibilidadId').value);
+            actualizarBoton();
+        }
+
+        function actualizarBoton() {
+            const submitBtn = document.getElementById('submitBtn');
+            if (fechaSeleccionada && medicoSeleccionado && disponibilidadSeleccionada) {
+                submitBtn.disabled = false;
+                console.log("Botón habilitado");
+            } else {
+                submitBtn.disabled = true;
+                console.log("Botón deshabilitado - F:", fechaSeleccionada, "M:", medicoSeleccionado, "D:", disponibilidadSeleccionada);
+            }
+        }
+
+        document.getElementById('formCita').addEventListener('submit', function(e) {
+            console.log("Enviando form, disponibilidad:", document.getElementById('disponibilidadId').value);
+            
+            if (!document.getElementById('disponibilidadId').value) {
+                e.preventDefault();
+                alert('Por favor completa todos los pasos');
+                return false;
+            }
+        });
+
+        console.log("Script cargado, disponibilidades totales:", todasDisponibilidades.length);
+    </script>
 </body>
 </html>

@@ -3,33 +3,38 @@ package com.Proyecto.Hospital.Service;
 import com.Proyecto.Hospital.Model.Cita;
 import com.Proyecto.Hospital.Model.Medico;
 import com.Proyecto.Hospital.Model.Usuario;
+import com.Proyecto.Hospital.Model.DisponibilidadMedica;
 import com.Proyecto.Hospital.Repository.CitaRepository;
 import com.Proyecto.Hospital.Repository.MedicoRepository;
+import com.Proyecto.Hospital.Repository.DisponibilidadMedicaRepository;
 import java.util.Optional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CitaService {
 
-    // Acepta "7:00" y "07:00" por igual (el guion opcional del minuto también admite 1 o 2 dígitos)
-    private static final DateTimeFormatter FORMATO_HORA = new DateTimeFormatterBuilder()
-            .appendPattern("H:mm")
-            .toFormatter();
-
+    private static final Logger logger = LoggerFactory.getLogger(CitaService.class);
+    private static final int DURACION_CITA_HORAS = 4; // Duración aproximada de cada cita
+    
     private final CitaRepository citaRepository;
     private final MedicoRepository medicoRepository;
+    private final DisponibilidadMedicaRepository disponibilidadRepository;
+    private final NotificacionService notificacionService;
     
-    public CitaService(CitaRepository citaRepository, MedicoRepository medicoRepository) {
+    public CitaService(CitaRepository citaRepository, MedicoRepository medicoRepository,
+                      DisponibilidadMedicaRepository disponibilidadRepository,
+                      NotificacionService notificacionService) {
         this.citaRepository = citaRepository;
         this.medicoRepository = medicoRepository;
+        this.disponibilidadRepository = disponibilidadRepository;
+        this.notificacionService = notificacionService;
     }
 
     public List<Cita> ListarPorUsuario(Long usuarioId) {
@@ -40,67 +45,75 @@ public class CitaService {
         return citaRepository.findAll();
     }
 
-    private boolean horaEstaDisponible(String disponibilidadHorario , LocalTime hora) {
-        String[] horas = disponibilidadHorario.split(",");
-        for (String horaStr : horas) {
-            String[] rango = horaStr.trim().split("-");
-            LocalTime inicio = LocalTime.parse(rango[0].trim(), FORMATO_HORA);
-            LocalTime fin = LocalTime.parse(rango[1].trim(), FORMATO_HORA);
-            if (!hora.isBefore(inicio) && hora.isBefore(fin)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Transactional
-    public String Reservar (Usuario usuario, Long medicoId, LocalDate fecha, LocalTime hora) {
-        //Validr caampos obligatorios 
-        if (  medicoId == null || fecha == null || hora == null) {
+    public String Reservar(Usuario usuario, Long disponibilidadId) {
+        if (usuario == null || disponibilidadId == null) {
             return "Error: faltan campos obligatorios";
         }
 
-        //Validar que el medico exista
-        Medico medicoExistente = medicoRepository.findById(medicoId).orElse(null);
-        if (medicoExistente == null) {
-            return "Error: medico no existe";
+        Optional<DisponibilidadMedica> dispOpt = disponibilidadRepository.findByIdAndActivoTrue(disponibilidadId);
+        if (dispOpt.isEmpty()) {
+            return "Error: el espacio de disponibilidad no existe o está inactivo";
         }
 
-        //No crear citas en pasado 
-        LocalDateTime fechaHoraCita = LocalDateTime.of(fecha, hora);
-        if (fechaHoraCita.isBefore(LocalDateTime.now())) {
-            return "Error: no se puede reservar citas en pasado";
-        }
-        
-        //Validar disponibilidad de horario
-        if (!horaEstaDisponible(medicoExistente.getDisponibilidadHoraria(), hora)) {
-            return "Error: el horario no está disponible para el médico seleccionado";
+        DisponibilidadMedica disponibilidad = dispOpt.get();
+        Medico medico = disponibilidad.getMedico();
+        LocalDate fecha = disponibilidad.getFecha();
+        LocalTime horaInicio = disponibilidad.getHoraInicio();
+        LocalTime horaFin = disponibilidad.getHoraFin();
+
+        // Validar que hay suficiente tiempo disponible (mínimo DURACION_CITA_HORAS)
+        long minutosDisponibles = java.time.temporal.ChronoUnit.MINUTES.between(horaInicio, horaFin);
+        if (minutosDisponibles < DURACION_CITA_HORAS * 60) {
+            return "Error: no hay suficiente tiempo disponible para agendar una cita";
         }
 
-        //Verificar espacio no ocupado
-        Optional<Cita> Cita = citaRepository.findByMedicoIdAndFechaAndHoraAndEstadoNot(medicoId, fecha, hora, "CANCELADA");
-        if (Cita.isPresent()) {
-            return "Error: el espacio ya está ocupado";
-        }
-
-        //Verificar que los usarios no tengan citas a la misma hora 
-        List<Cita> citas = citaRepository.findByUsuarioId(usuario.getId());
-        for (Cita c : citas) {
-            if (c.getFecha().equals(fecha) && c.getHora().equals(hora) && !c.getEstado().equals("CANCELADA")) {
-                return "Error: ya existe una cita en la misma hora";
-            }
+        // Validar que no haya cita activa en ese espacio
+        Optional<Cita> citaExistente = citaRepository.findActivaCitaByMedicoAndFechaAndHora(
+            medico.getId(), fecha, horaInicio
+        );
+        if (citaExistente.isPresent()) {
+            return "Error: el espacio ya está ocupado por otra cita";
         }
 
         // Crear cita
         Cita cita = new Cita();
         cita.setUsuario(usuario);
-        cita.setMedico(medicoExistente);
+        cita.setMedico(medico);
+        cita.setDisponibilidad(disponibilidad);
         cita.setFecha(fecha);
-        cita.setHora(hora);
+        cita.setHora(horaInicio);
         cita.setEstado("PENDIENTE");
         cita.setFechaCreacion(LocalDateTime.now());
+        
         citaRepository.save(cita);
+        logger.info("Cita creada para usuario {} en disponibilidad {}", usuario.getId(), disponibilidadId);
+        
+        // Reducir disponibilidad
+        reducirDisponibilidad(disponibilidad, DURACION_CITA_HORAS);
+        
+        notificacionService.enviarNotificacionPendienteMedico(cita);
+        
         return "Cita Reservada";
+    }
+
+    @Transactional
+    private void reducirDisponibilidad(DisponibilidadMedica disponibilidad, int horasACitar) {
+        LocalTime nuevoInicio = disponibilidad.getHoraInicio().plusHours(horasACitar);
+        
+        // Si el nuevo inicio llega a o supera la hora fin, desactivar
+        if (!nuevoInicio.isBefore(disponibilidad.getHoraFin())) {
+            disponibilidad.setActivo(false);
+            logger.info("Disponibilidad {} desactivada - no hay más espacio", disponibilidad.getId());
+        } else {
+            disponibilidad.setHoraInicio(nuevoInicio);
+            logger.info("Disponibilidad {} reducida de {} a {}", 
+                disponibilidad.getId(), 
+                disponibilidad.getHoraInicio(), 
+                nuevoInicio);
+        }
+        
+        disponibilidadRepository.save(disponibilidad);
     }
 
     @Transactional
@@ -116,10 +129,8 @@ public class CitaService {
         }
 
         boolean esAdmin = "ADMIN".equalsIgnoreCase(usuario.getRol());
-        if (!esAdmin) {
-            if (!cita.getUsuario().getId().equals(usuario.getId())) {
-                return "Error: no tienes permisos para cancelar esta cita";
-            }
+        if (!esAdmin && !cita.getUsuario().getId().equals(usuario.getId())) {
+            return "Error: no tienes permisos para cancelar esta cita";
         }
 
         if (!esAdmin) {
@@ -130,8 +141,34 @@ public class CitaService {
         }
 
         cita.setEstado("CANCELADA");
+        cita.setFechaCancelacion(LocalDateTime.now());
         citaRepository.save(cita);
+        
+        // Restaurar disponibilidad
+        restaurarDisponibilidad(cita.getDisponibilidad());
+        
+        notificacionService.enviarNotificacionCancelacion(cita);
+        
         return "Cita Cancelada";
+    }
+
+    @Transactional
+    private void restaurarDisponibilidad(DisponibilidadMedica disponibilidad) {
+        // Restaurar el horario original del médico para ese día
+        String horarioStr = disponibilidad.getMedico().getDisponibilidadHoraria();
+        if (horarioStr != null && !horarioStr.isBlank()) {
+            String[] partes = horarioStr.split(",");
+            String primerRango = partes[0].trim();
+            String[] horarios = primerRango.split("-");
+            
+            if (horarios.length == 2) {
+                LocalTime horaOriginal = LocalTime.parse(horarios[0].trim());
+                disponibilidad.setHoraInicio(horaOriginal);
+                disponibilidad.setActivo(true);
+                disponibilidadRepository.save(disponibilidad);
+                logger.info("Disponibilidad {} restaurada a {}", disponibilidad.getId(), horaOriginal);
+            }
+        }
     }
 
     @Transactional
@@ -152,6 +189,9 @@ public class CitaService {
 
         cita.setEstado("CONFIRMADA");
         citaRepository.save(cita);
+        
+        notificacionService.enviarNotificacionConfirmacion(cita);
+        
         return "Cita Confirmada";
     }
 
@@ -159,5 +199,9 @@ public class CitaService {
         if (estado != null && estado.isBlank()) estado = null;
         if (especialidad != null && especialidad.isBlank()) especialidad = null;
         return citaRepository.filtrar(estado, medicoId, especialidad, fechaDesde, fechaHasta);
+    }
+    
+    public Optional<Cita> obtenerCitaPorId(Long citaId) {
+        return citaRepository.findById(citaId);
     }
 }

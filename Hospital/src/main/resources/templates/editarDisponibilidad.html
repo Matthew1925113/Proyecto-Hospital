@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Disponibilidades</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #2196F3;
+        }
+        .form-section {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+        .disponibilidad-item {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            background-color: white;
+        }
+        .disponibilidad-item.inactivo {
+            opacity: 0.6;
+            background-color: #f5f5f5;
+        }
+        .disponibilidad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .disponibilidad-fecha {
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+        .disponibilidad-horario {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .estado-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .estado-activo {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        .estado-inactivo {
+            background-color: #ffcccc;
+            color: #c62828;
+        }
+        .form-inline {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+        .medicos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .medico-card {
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .medico-card:hover {
+            border-color: #2196F3;
+            background-color: #e3f2fd;
+        }
+        .medico-card.selected {
+            border-color: #1976d2;
+            background-color: #e3f2fd;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="navbar" role="banner">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
+                <nav class="navbar-nav" aria-label="Main navigation">
+                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
+                    <a class="nav-link" th:href="@{/listaMedicos}">Médicos</a>
+                    <form th:action="@{/logout}" method="post" class="inline-form">
+                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content" role="main">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Editar Disponibilidades de Médicos</h1>
+                </div>
+
+                <div class="info-box">
+                    <strong>📝 Instrucciones:</strong>
+                    <p>Aquí puedes editar la disponibilidad de los médicos para fechas específicas sin afectar otros días. Puedes:</p>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Modificar horarios individuales por día</li>
+                        <li>Actualizar múltiples días a la vez (rango de fechas)</li>
+                        <li>Desactivar un médico si es necesario</li>
+                    </ul>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger">
+                    <strong>Error:</strong> <span th:text="${error}"></span>
+                </div>
+
+                <div th:if="${message}" class="alert alert-success">
+                    <strong>Éxito:</strong> <span th:text="${message}"></span>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        
+                        <!-- PASO 1: SELECCIONAR MÉDICO Y FECHA -->
+                        <h2 class="section-title">Paso 1: Selecciona Médico y Fecha</h2>
+                        
+                        <div class="form-section">
+                            <form th:action="@{/disponibilidades/editar}" method="get">
+                                <div class="form-group">
+                                    <label for="medicoId" class="form-label">
+                                        <span style="color: red;">*</span> Médico
+                                    </label>
+                                    <div class="medicos-grid" id="medicosContainer">
+                                        <div th:each="medico : ${medicos}" 
+                                             class="medico-card"
+                                             th:onclick="'seleccionarMedicoForm(this, ' + ${medico.id} + ')'">
+                                            <strong th:text="${medico.nombre} + ' ' + ${medico.apellido}"></strong>
+                                            <small th:text="${medico.especialidad}" style="display: block; margin-top: 0.25rem;"></small>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="medicoId" name="medicoId" value="">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fecha" class="form-label">
+                                        <span style="color: red;">*</span> Fecha
+                                    </label>
+                                    <input type="date" id="fecha" name="fecha" class="form-input" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Ver Disponibilidades</button>
+                            </form>
+                        </div>
+
+                        <!-- PASO 2: EDITAR DISPONIBILIDADES INDIVIDUALES -->
+                        <div th:if="${disponibilidades != null and !disponibilidades.isEmpty()}">
+                            <h2 class="section-title">Paso 2: Editar Disponibilidades del <span th:text="${fechaSeleccionada}"></span></h2>
+                            
+                            <div th:each="disp : ${disponibilidades}" class="disponibilidad-item" th:classappend="${!disp.activo} ? 'inactivo'">
+                                <div class="disponibilidad-header">
+                                    <div>
+                                        <div class="disponibilidad-fecha" th:text="${#dates.format(disp.fecha, 'dd/MM/yyyy')}"></div>
+                                        <div class="disponibilidad-horario" th:text="${disp.horaInicio} + ' - ' + ${disp.horaFin}"></div>
+                                    </div>
+                                    <span class="estado-badge" th:classappend="${disp.activo} ? 'estado-activo' : 'estado-inactivo'" 
+                                          th:text="${disp.activo} ? 'ACTIVO' : 'INACTIVO'"></span>
+                                </div>
+
+                                <form th:action="@{/disponibilidades/actualizar/{id}(id=${disp.id})}" method="post" class="form-inline">
+                                    <div class="form-group">
+                                        <label>Hora Inicio</label>
+                                        <input type="time" name="horaInicio" th:value="${disp.horaInicio}" class="form-input" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Hora Fin</label>
+                                        <input type="time" name="horaFin" th:value="${disp.horaFin}" class="form-input" required>
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <label>
+                                            <input type="checkbox" name="activo" value="true" th:checked="${disp.activo}">
+                                            Activo
+                                        </label>
+                                        <button type="submit" class="btn btn-primary btn-sm">Actualizar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div th:if="${disponibilidades != null and disponibilidades.isEmpty() and medicoSeleccionado != null}">
+                            <div class="alert alert-info">
+                                <strong>ℹ️ Información:</strong> No hay disponibilidades registradas para este médico en esta fecha.
+                            </div>
+                        </div>
+
+                        <!-- PASO 3: EDITAR RANGO DE FECHAS -->
+                        <h2 class="section-title">Paso 3: Actualizar Rango de Fechas</h2>
+                        
+                        <div class="form-section">
+                            <p style="color: #666; margin-bottom: 1rem;">Actualiza la disponibilidad para varios días a la vez sin afectar otros días:</p>
+                            
+                            <form th:action="@{/disponibilidades/actualizar-rango}" method="post">
+                                <div class="form-group">
+                                    <label for="rangoMedicoId" class="form-label">
+                                        <span style="color: red;">*</span> Médico
+                                    </label>
+                                    <select id="rangoMedicoId" name="medicoId" class="form-input" required>
+                                        <option value="">-- Seleccione un médico --</option>
+                                        <option th:each="medico : ${medicos}"
+                                                th:value="${medico.id}"
+                                                th:text="${medico.nombre} + ' ' + ${medico.apellido}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="form-group">
+                                        <label for="fechaDesde" class="form-label">
+                                            <span style="color: red;">*</span> Fecha Desde
+                                        </label>
+                                        <input type="date" id="fechaDesde" name="fechaDesde" class="form-input" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="fechaHasta" class="form-label">
+                                            <span style="color: red;">*</span> Fecha Hasta
+                                        </label>
+                                        <input type="date" id="fechaHasta" name="fechaHasta" class="form-input" required>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="form-group">
+                                        <label for="horaInicioRango" class="form-label">
+                                            <span style="color: red;">*</span> Hora Inicio
+                                        </label>
+                                        <input type="time" id="horaInicioRango" name="horaInicio" class="form-input" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="horaFinRango" class="form-label">
+                                            <span style="color: red;">*</span> Hora Fin
+                                        </label>
+                                        <input type="time" id="horaFinRango" name="horaFin" class="form-input" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" name="activo" value="true" checked>
+                                        Mantener Activo
+                                    </label>
+                                    <small style="display: block; color: #666; margin-top: 0.5rem;">Desmarca si deseas desactivar el médico en este rango de fechas</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Actualizar Rango</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                Hospital - Sistema de Gestión
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function seleccionarMedicoForm(element, medicoId) {
+            document.querySelectorAll('.medico-card').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            document.getElementById('medicoId').value = medicoId;
+        }
+    </script>
+</body>
+</html>

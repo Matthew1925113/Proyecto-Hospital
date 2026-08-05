@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Citas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .badge-confirmada {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .badge-cancelada {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -105,7 +126,9 @@
                                         <td th:text="${cita.fecha}"></td>
                                         <td th:text="${cita.hora}"></td>
                                         <td>
-                                            <span th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'PENDIENTE'}" class="badge badge-pendiente" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="badge badge-confirmada" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CANCELADA'}" class="badge badge-cancelada" th:text="${cita.estado}"></span>
                                         </td>
                                         <td>
                                             <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
