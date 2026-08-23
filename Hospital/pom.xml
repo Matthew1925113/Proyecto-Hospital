@@ -80,6 +80,11 @@
 		<dependency> 
 			<groupId>org.thymeleaf.extras</groupId> 
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>  
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.12.0</version>
 		</dependency>		
 	</dependencies>
 

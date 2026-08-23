@@ -461,3 +461,21 @@ a:hover {
     text-align: center;
   }
 }
+/* Badges de estado de usuario */
+.badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-activo {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-inactivo {
+  background-color: #f8d7da;
+  color: #721c24;
+}

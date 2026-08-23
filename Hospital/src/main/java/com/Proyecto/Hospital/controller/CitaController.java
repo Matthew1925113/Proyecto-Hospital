@@ -14,7 +14,15 @@ import java.security.Principal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import com.opencsv.CSVWriter;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,6 +225,60 @@ public class CitaController {
             logger.error("Error al ver detalles de cita", e);
             model.addAttribute("error", "Error al cargar detalles de la cita: " + e.getMessage());
             return "error";
+        }
+    }
+
+    @PostMapping("/citas/exportar/csv")
+    public ResponseEntity<Resource> exportarCitasCSV(@RequestParam(required = false) String estado,
+                                                    @RequestParam(required = false) Long medicoId,
+                                                    @RequestParam(required = false) String especialidad,
+                                                    @RequestParam(required = false) String fechaDesdeStr,
+                                                    @RequestParam(required = false) String fechaHastaStr,
+                                                    Principal principal) {
+        Usuario usuario = usuarioRepository.findByEmail(principal.getName()).orElse(null);
+        if (usuario == null || !"ADMIN".equalsIgnoreCase(usuario.getRol())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        LocalDate desde = (fechaDesdeStr == null || fechaDesdeStr.isEmpty()) ? null : LocalDate.parse(fechaDesdeStr);
+        LocalDate hasta = (fechaHastaStr == null || fechaHastaStr.isEmpty()) ? null : LocalDate.parse(fechaHastaStr);
+
+        List<Cita> citas = citaService.Filtrar(estado, medicoId, especialidad, desde, hasta);
+
+        byte[] csv = generarCSV(citas);
+        ByteArrayResource resource = new ByteArrayResource(csv);
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename= reporte-citas" + LocalDate.now() + ".csv")
+            .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+            .contentLength(csv.length)
+            .body(resource);   
+    }
+
+    private byte[] generarCSV(List<Cita> citas) {
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            CSVWriter writer = new CSVWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {
+            
+            baos.write( new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF } ); // BOM para UTF-8
+
+            writer.writeNext(new String[] { "ID", "Usuario", "Email", "Medico", "Especialidad", "Fecha", "Hora", "Estado", "Creacion" });
+
+            for (Cita c : citas) {
+                writer.writeNext(new String[] { String.valueOf( c.getId()), 
+                                                c.getUsuario().getNombre(),
+                                                c.getUsuario().getEmail(),  
+                                                c.getMedico().getNombre() + " " + c.getMedico().getApellido(),
+                                                c.getMedico().getEspecialidad(),
+                                                c.getFecha().toString(),
+                                                c.getHora().toString(),
+                                                c.getEstado(), 
+                                                c.getFechaCreacion().toString() });
+            }
+            writer.flush();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            logger.error("Error al generar CSV", e);
+            throw new RuntimeException("Error al generar CSV", e);
         }
     }
 }

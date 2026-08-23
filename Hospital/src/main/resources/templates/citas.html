@@ -53,7 +53,9 @@
                 <div th:if="${usuario.rol == 'ADMIN'}" class="card" style="margin-bottom: 1.5rem;">
                     <div class="card-header">Filtrar citas</div>
                     <div class="card-body">
-                        <form th:action="@{/citas}" method="get">
+                        <form th:action="@{/citas}" method="get" id="filtroForm">
+                            <!-- Token CSRF necesario para la exportación POST -->
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                                 <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
                                     <label for="estado" class="form-label">Estado</label>
@@ -93,9 +95,25 @@
                                 <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
                                     <button type="submit" class="btn btn-primary">Filtrar</button>
                                     <a th:href="@{/citas}" class="btn btn-outline">Limpiar</a>
+
+                                    <button th:if="${usuario.rol == 'ADMIN'}" 
+                                            type="button" 
+                                            class="btn btn-success"
+                                            onclick="exportarCSV()">
+                                        Exportar CSV
+                                    </button>
                                 </div>
                             </div>
                         </form>
+                        
+                        <script>
+                            function exportarCSV() {
+                                const form = document.getElementById('filtroForm');
+                                form.action = '/citas/exportar/csv';
+                                form.method = 'POST';
+                                form.submit();
+                            }
+                        </script>
                     </div>
                 </div>
 

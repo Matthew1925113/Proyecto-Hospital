@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class CitaService {
 
     private static final Logger logger = LoggerFactory.getLogger(CitaService.class);
-    private static final int DURACION_CITA_HORAS = 4; // Duración aproximada de cada cita
+    private static final int DURACION_CITA_HORAS = 1; // Duración aproximada de cada cita
     
     private final CitaRepository citaRepository;
     private final MedicoRepository medicoRepository;
@@ -64,7 +64,7 @@ public class CitaService {
 
         // Validar que hay suficiente tiempo disponible (mínimo DURACION_CITA_HORAS)
         long minutosDisponibles = java.time.temporal.ChronoUnit.MINUTES.between(horaInicio, horaFin);
-        if (minutosDisponibles < DURACION_CITA_HORAS * 60) {
+        if (minutosDisponibles < DURACION_CITA_HORAS * 30) {
             return "Error: no hay suficiente tiempo disponible para agendar una cita";
         }
 
@@ -74,6 +74,14 @@ public class CitaService {
         );
         if (citaExistente.isPresent()) {
             return "Error: el espacio ya está ocupado por otra cita";
+        }
+
+        // Validar que el usuario no tenga ya una cita en ese horario
+        List<Cita> citasUsuario = citaRepository.findActivaCitasByUsuarioAndFechaAndHoraRange(
+            usuario.getId(), fecha, horaInicio, horaFin
+        );
+        if (!citasUsuario.isEmpty()) {
+            return "Error: ya tienes una cita pendiente o confirmada en ese horario";
         }
 
         // Crear cita

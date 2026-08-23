@@ -23,6 +23,11 @@
                     Sesión cerrada correctamente
                 </div>
 
+                <div th:if="${param.inactivo}" class="alert alert-danger" role="alert">
+                    Usuario inactivo. Contacte al administrador.
+
+                </div>
+
                 <form th:action="@{/login}" method="post">
                     <div class="form-group">
                         <label for="email" class="form-label">Email</label>

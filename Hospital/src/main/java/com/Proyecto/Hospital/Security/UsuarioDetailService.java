@@ -1,5 +1,6 @@
 package com.Proyecto.Hospital.Security;
 
+import org.springframework.security.authentication.DisabledException;
 import com.Proyecto.Hospital.Model.Usuario;
 import com.Proyecto.Hospital.Repository.UsuarioRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,10 @@ public class UsuarioDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado" + email));
+
+        if ("INACTIVO".equals(usuario.getEstado())) {
+            throw new DisabledException("Usuario inactivo");
+        }
         return User.builder()
             .username(usuario.getEmail())
             .password(usuario.getPassword())

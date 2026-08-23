@@ -3,6 +3,7 @@ package com.Proyecto.Hospital.Config;
 import com.Proyecto.Hospital.Security.LoginSecurityHeadler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,15 +30,28 @@ public class SecurityConfig  {
                 // Rutas públicas
                 .requestMatchers("/login", "/acceso-denegado", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 // Rutas privadas
-                .requestMatchers("/inicio").hasAnyRole("ADMIN", "USUARIO")
-                .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", "/eliminarPaciente", "/EliminarPaciente", "/medicos", "/listaUsuarios", "/Usuarios", "/nuevoUsuario", "/FormularioUsuario", "/EditarUsuario/**", "/editarUsuario/**", "/GuardarUsuario", "/eliminarUsuario", "/EliminarUsuario").hasRole("ADMIN")
-                .requestMatchers("/citas/**", "/perfil", "/actualizarPerfil").hasAnyRole("ADMIN", "USUARIO")
+                .requestMatchers("/perfil", "/actualizarPerfil").authenticated()  // Cualquier usuario autenticado
+                .requestMatchers("/citas/**", "/inicio").hasAnyRole("ADMIN", "USUARIO")      // O solo ADMIN según necesidad
+                .requestMatchers("/listaPacientes", "/pacienteNuevo", "/FormularioPaciente", 
+                                "/EditarPaciente/**", "/editarPaciente/**", "/GuardarPaciente", 
+                                "/eliminarPaciente", "/EliminarPaciente", 
+                                "/medicos", "/listaMedicos", "/listaUsuarios", "/Usuarios", 
+                                "/nuevoUsuario", "/FormularioUsuario", "/EditarUsuario/**", 
+                                "/editarUsuario/**", "/GuardarUsuario", "/eliminarUsuario", 
+                                "/EliminarUsuario" , "/citas/exportar/**").hasRole("ADMIN")  // Solo ADMIN
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .usernameParameter("email")
                 .successHandler(loginSecurityHeadler)
+                .failureHandler((request, response, exception) -> {
+                    if (exception instanceof DisabledException) {
+                        response.sendRedirect("/login?inactivo");
+                    } else {
+                        response.sendRedirect("/login?error");
+                    }
+                })
                 .permitAll()
             )
             .logout(logout -> logout
