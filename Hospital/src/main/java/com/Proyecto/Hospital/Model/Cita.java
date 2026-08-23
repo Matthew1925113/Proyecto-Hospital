@@ -20,10 +20,15 @@ public class Cita {
     @JoinColumn(name = "medico_id")
     private Medico medico;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "disponibilidad_id", nullable = true)
+    private DisponibilidadMedica disponibilidad;
+
     private LocalDate fecha;
     private LocalTime hora;
     private String estado;
     private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCancelacion;
 
     public Cita() {
     }
@@ -50,6 +55,14 @@ public class Cita {
 
     public void setMedico(Medico medico) {
         this.medico = medico;
+    }
+
+    public DisponibilidadMedica getDisponibilidad() {
+        return disponibilidad;
+    }
+
+    public void setDisponibilidad(DisponibilidadMedica disponibilidad) {
+        this.disponibilidad = disponibilidad;
     }
 
     public LocalDate getFecha() {
@@ -84,4 +97,11 @@ public class Cita {
         this.fechaCreacion = fechaCreacion;
     }
 
+    public LocalDateTime getFechaCancelacion() {
+        return fechaCancelacion;
+    }
+
+    public void setFechaCancelacion(LocalDateTime fechaCancelacion) {
+        this.fechaCancelacion = fechaCancelacion;
+    }
 }

@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Citas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .badge-confirmada {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .badge-cancelada {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -32,7 +53,9 @@
                 <div th:if="${usuario.rol == 'ADMIN'}" class="card" style="margin-bottom: 1.5rem;">
                     <div class="card-header">Filtrar citas</div>
                     <div class="card-body">
-                        <form th:action="@{/citas}" method="get">
+                        <form th:action="@{/citas}" method="get" id="filtroForm">
+                            <!-- Token CSRF necesario para la exportación POST -->
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                                 <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
                                     <label for="estado" class="form-label">Estado</label>
@@ -72,9 +95,25 @@
                                 <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
                                     <button type="submit" class="btn btn-primary">Filtrar</button>
                                     <a th:href="@{/citas}" class="btn btn-outline">Limpiar</a>
+
+                                    <button th:if="${usuario.rol == 'ADMIN'}" 
+                                            type="button" 
+                                            class="btn btn-success"
+                                            onclick="exportarCSV()">
+                                        Exportar CSV
+                                    </button>
                                 </div>
                             </div>
                         </form>
+                        
+                        <script>
+                            function exportarCSV() {
+                                const form = document.getElementById('filtroForm');
+                                form.action = '/citas/exportar/csv';
+                                form.method = 'POST';
+                                form.submit();
+                            }
+                        </script>
                     </div>
                 </div>
 
@@ -105,7 +144,9 @@
                                         <td th:text="${cita.fecha}"></td>
                                         <td th:text="${cita.hora}"></td>
                                         <td>
-                                            <span th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'PENDIENTE'}" class="badge badge-pendiente" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="badge badge-confirmada" th:text="${cita.estado}"></span>
+                                            <span th:if="${cita.estado == 'CANCELADA'}" class="badge badge-cancelada" th:text="${cita.estado}"></span>
                                         </td>
                                         <td>
                                             <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"

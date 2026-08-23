@@ -21,6 +21,10 @@ public class Usuario {
     @Column (nullable=false)
     private String rol = "USUARIO";
 
+    @Column (nullable=false)
+    private String estado = "ACTIVO";
+
+
     public Usuario() {}
 
     public Long getId(){
@@ -61,6 +65,14 @@ public class Usuario {
 
     public void setRol(String rol){
         this.rol = rol;
+    }
+
+    public String getEstado(){
+        return estado;
+    }
+
+    public void setEstado(String estado){
+        this.estado = estado;
     }
 
 }

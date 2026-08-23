@@ -29,4 +29,19 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
                     @Param("fechaHasta") LocalDate fechaHasta);
 
     List<Cita> findByMedicoId(Long medicoId);
+
+    @Query("SELECT c FROM Cita c WHERE c.medico.id = :medicoId AND c.fecha = :fecha AND c.hora = :hora AND c.estado != 'CANCELADA'")
+    Optional<Cita> findActivaCitaByMedicoAndFechaAndHora(
+        @Param("medicoId") Long medicoId,
+        @Param("fecha") LocalDate fecha,
+        @Param("hora") LocalTime hora
+    );
+
+    @Query("SELECT c FROM Cita c WHERE c.usuario.id = :usuarioId AND c.fecha = :fecha AND c.hora >= :horaInicio AND c.hora < :horaFin AND c.estado != 'CANCELADA'")
+    List<Cita> findActivaCitasByUsuarioAndFechaAndHoraRange(
+        @Param("usuarioId") Long usuarioId,
+        @Param("fecha") LocalDate fecha,
+        @Param("horaInicio") LocalTime horaInicio,
+        @Param("horaFin") LocalTime horaFin
+    );
 }
