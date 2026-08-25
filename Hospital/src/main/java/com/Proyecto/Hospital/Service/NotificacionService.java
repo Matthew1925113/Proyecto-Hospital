@@ -5,51 +5,70 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Servicio de notificaciones para el módulo de citas.
- * En producción, esto se integraría con un sistema de email, SMS, o push notifications.
- * Por ahora, registra las notificaciones en logs.
- */
+
 @Service
 public class NotificacionService {
-    
-    private static final Logger logger = LoggerFactory.getLogger(NotificacionService.class);
-    
-    /**
-     * Enviar notificación al médico cuando se reserva una cita (estado PENDIENTE)
-     * El médico debe confirmar o denegar la cita
-     */
+
+    private static final Logger logger =
+        LoggerFactory.getLogger(NotificacionService.class);
+
     public void enviarNotificacionPendienteMedico(Cita cita) {
+
+        if (cita == null
+            || cita.getMedico() == null
+            || cita.getUsuario() == null) {
+
+            logger.warn(
+                "No se pudo generar la notificación de cita pendiente porque faltan datos."
+            );
+
+            return;
+        }
+
+
         String mensaje = String.format(
-            "[NOTIFICACIÓN MÉDICO] Tienes una nueva cita pendiente de confirmar.\n" +
-            "Paciente: %s\n" +
-            "Fecha: %s\n" +
-            "Hora: %s\n" +
-            "ID Cita: %d\n" +
-            "Acciones: Confirmar o Denegar",
+            "[NOTIFICACIÓN MÉDICO] Tienes una nueva cita pendiente de gestionar.%n" +
+            "Paciente: %s%n" +
+            "Fecha: %s%n" +
+            "Hora: %s%n" +
+            "ID Cita: %d%n" +
+            "Acciones disponibles: Confirmar o Rechazar",
             cita.getUsuario().getNombre(),
             cita.getFecha(),
             cita.getHora(),
             cita.getId()
         );
-        
-        logger.info("ENVIANDO NOTIFICACIÓN AL MÉDICO: " + cita.getMedico().getEmail());
+
+
+        logger.info(
+            "ENVIANDO NOTIFICACIÓN AL MÉDICO: {}",
+            cita.getMedico().getEmail()
+        );
+
         logger.info(mensaje);
-        
-        // TODO: Implementar envío de email real
-        // mailService.enviar(cita.getMedico().getEmail(), "Cita Pendiente de Confirmación", mensaje);
+
     }
-    
-    /**
-     * Enviar notificación al usuario cuando su cita es confirmada
-     */
+
     public void enviarNotificacionConfirmacion(Cita cita) {
+
+        if (cita == null
+            || cita.getMedico() == null
+            || cita.getUsuario() == null) {
+
+            logger.warn(
+                "No se pudo generar la notificación de confirmación porque faltan datos."
+            );
+
+            return;
+        }
+
+
         String mensaje = String.format(
-            "[NOTIFICACIÓN CONFIRMACIÓN] Tu cita ha sido confirmada.\n" +
-            "Médico: %s %s\n" +
-            "Especialidad: %s\n" +
-            "Fecha: %s\n" +
-            "Hora: %s\n" +
+            "[NOTIFICACIÓN CONFIRMACIÓN] Tu cita ha sido confirmada.%n" +
+            "Médico: %s %s%n" +
+            "Especialidad: %s%n" +
+            "Fecha: %s%n" +
+            "Hora: %s%n" +
             "Estado: CONFIRMADA",
             cita.getMedico().getNombre(),
             cita.getMedico().getApellido(),
@@ -57,38 +76,98 @@ public class NotificacionService {
             cita.getFecha(),
             cita.getHora()
         );
-        
-        logger.info("ENVIANDO NOTIFICACIÓN AL USUARIO: " + cita.getUsuario().getEmail());
+
+
+        logger.info(
+            "ENVIANDO NOTIFICACIÓN AL USUARIO: {}",
+            cita.getUsuario().getEmail()
+        );
+
         logger.info(mensaje);
-        
-        // TODO: Implementar envío de email real
-        // mailService.enviar(cita.getUsuario().getEmail(), "Cita Confirmada", mensaje);
+
     }
-    
-    /**
-     * Enviar notificación cuando una cita es cancelada
-     */
-    public void enviarNotificacionCancelacion(Cita cita) {
+
+    public void enviarNotificacionRechazo(Cita cita) {
+
+        if (cita == null
+            || cita.getMedico() == null
+            || cita.getUsuario() == null) {
+
+            logger.warn(
+                "No se pudo generar la notificación de rechazo porque faltan datos."
+            );
+
+            return;
+        }
+
+
         String mensaje = String.format(
-            "[NOTIFICACIÓN CANCELACIÓN] Tu cita ha sido cancelada.\n" +
-            "Médico: %s %s\n" +
-            "Fecha: %s\n" +
-            "Hora: %s\n" +
-            "Por favor, agenda una nueva cita si es necesario.",
+            "[NOTIFICACIÓN RECHAZO] Tu solicitud de cita fue rechazada.%n" +
+            "Médico: %s %s%n" +
+            "Especialidad: %s%n" +
+            "Fecha: %s%n" +
+            "Hora: %s%n" +
+            "Estado: RECHAZADA%n" +
+            "Puedes seleccionar otro horario disponible.",
+            cita.getMedico().getNombre(),
+            cita.getMedico().getApellido(),
+            cita.getMedico().getEspecialidad(),
+            cita.getFecha(),
+            cita.getHora()
+        );
+
+
+        logger.info(
+            "ENVIANDO NOTIFICACIÓN DE RECHAZO AL USUARIO: {}",
+            cita.getUsuario().getEmail()
+        );
+
+        logger.info(mensaje);
+
+    }
+
+    public void enviarNotificacionCancelacion(Cita cita) {
+
+        if (cita == null
+            || cita.getMedico() == null
+            || cita.getUsuario() == null) {
+
+            logger.warn(
+                "No se pudo generar la notificación de cancelación porque faltan datos."
+            );
+
+            return;
+        }
+
+
+        String mensaje = String.format(
+            "[NOTIFICACIÓN CANCELACIÓN] La cita ha sido cancelada.%n" +
+            "Médico: %s %s%n" +
+            "Fecha: %s%n" +
+            "Hora: %s%n" +
+            "Estado: CANCELADA%n" +
+            "El horario vuelve a quedar disponible.",
             cita.getMedico().getNombre(),
             cita.getMedico().getApellido(),
             cita.getFecha(),
             cita.getHora()
         );
-        
-        logger.info("ENVIANDO NOTIFICACIÓN DE CANCELACIÓN AL USUARIO: " + cita.getUsuario().getEmail());
+
+
+        logger.info(
+            "ENVIANDO NOTIFICACIÓN DE CANCELACIÓN AL USUARIO: {}",
+            cita.getUsuario().getEmail()
+        );
+
         logger.info(mensaje);
-        
-        logger.info("ENVIANDO NOTIFICACIÓN DE CANCELACIÓN AL MÉDICO: " + cita.getMedico().getEmail());
+
+
+        logger.info(
+            "ENVIANDO NOTIFICACIÓN DE CANCELACIÓN AL MÉDICO: {}",
+            cita.getMedico().getEmail()
+        );
+
         logger.info(mensaje);
-        
-        // TODO: Implementar envío de email real
-        // mailService.enviar(cita.getUsuario().getEmail(), "Cita Cancelada", mensaje);
-        // mailService.enviar(cita.getMedico().getEmail(), "Cita Cancelada por el Paciente", mensaje);
+
     }
 }

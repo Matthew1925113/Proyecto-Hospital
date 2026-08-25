@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
     <title>Detalles de Cita</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
+
+
     <style>
+
+        /* =========================================================
+           ESTADOS
+           ========================================================= */
+
         .badge {
             display: inline-block;
             padding: 0.5rem 1rem;
@@ -13,41 +32,86 @@
             font-size: 1rem;
             font-weight: 500;
         }
+
         .badge-pendiente {
             background-color: #fff3cd;
             color: #856404;
         }
+
         .badge-confirmada {
             background-color: #d4edda;
             color: #155724;
         }
+
         .badge-cancelada {
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        .badge-rechazada {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+
+        /* =========================================================
+           DETALLES
+           ========================================================= */
+
         .detail-row {
             display: flex;
             padding: 1rem 0;
             border-bottom: 1px solid #e0e0e0;
         }
+
         .detail-row:last-child {
             border-bottom: none;
         }
+
         .detail-label {
             font-weight: 600;
             color: #333;
             min-width: 200px;
         }
+
         .detail-value {
             color: #666;
             flex: 1;
         }
+
+
+        /* =========================================================
+           ACCIONES
+           ========================================================= */
+
         .action-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 2rem;
             flex-wrap: wrap;
+            align-items: center;
         }
+
+        .action-buttons form {
+            margin: 0;
+        }
+
+        .btn-rechazar {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-rechazar:hover {
+            background-color: #bb2d3b;
+            color: white;
+        }
+
+
+        /* =========================================================
+           INFORMACIÓN
+           ========================================================= */
+
         .alert-info {
             background-color: #e3f2fd;
             border-left: 4px solid #2196F3;
@@ -55,209 +119,762 @@
             border-radius: 4px;
             margin-bottom: 1.5rem;
         }
+
+        .alert-medico {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
     </style>
+
 </head>
+
+
 <body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
-                <nav class="navbar-nav" aria-label="Main navigation">
-                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
-                    <a class="nav-link" th:href="@{/citas}">Mis Citas</a>
-                    <form th:action="@{/logout}" method="post" class="inline-form">
-                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
-                    </form>
-                </nav>
+
+<div class="page-wrapper">
+
+
+    <!-- =========================================================
+         NAVBAR
+         ========================================================= -->
+    <header
+        class="navbar"
+        role="banner">
+
+        <div class="container">
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+
+                Hospital
+
+            </a>
+
+
+            <nav
+                class="navbar-nav"
+                aria-label="Main navigation">
+
+                <a
+                    class="nav-link"
+                    th:href="@{/inicio}">
+
+                    Inicio
+
+                </a>
+
+
+                <a
+                    class="nav-link"
+                    th:href="@{/citas}"
+                    th:text="${usuario.rol == 'MEDICO'
+                        ? 'Mis Citas Médicas'
+                        : 'Mis Citas'}">
+
+                    Mis Citas
+
+                </a>
+
+
+                <form
+                    th:action="@{/logout}"
+                    method="post"
+                    class="inline-form">
+
+                    <button
+                        type="submit"
+                        class="btn btn-link nav-link p-0">
+
+                        Cerrar Sesión
+
+                    </button>
+
+                </form>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         CONTENIDO PRINCIPAL
+         ========================================================= -->
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+
+            <!-- =================================================
+                 TÍTULO
+                 ================================================= -->
+            <div class="page-header">
+
+                <h1>Detalles de la Cita</h1>
+
             </div>
-        </header>
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1>Detalles de la Cita</h1>
-                </div>
 
-                <div th:if="${error}" class="alert alert-danger">
-                    <strong>Error:</strong> <span th:text="${error}"></span>
-                </div>
+            <!-- =================================================
+                 ERROR
+                 ================================================= -->
+            <div
+                th:if="${error}"
+                class="alert alert-danger">
 
-                <!-- ESTADO ACTUAL -->
-                <div class="alert-info">
-                    <strong>Estado Actual:</strong>
-                    <span th:class="'badge ' + ('PENDIENTE' == ${cita.estado} ? 'badge-pendiente' : 'CONFIRMADA' == ${cita.estado} ? 'badge-confirmada' : 'badge-cancelada')"
-                          th:text="${cita.estado}"
-                          style="margin-left: 0.5rem;">
-                    </span>
-                </div>
+                <strong>Error:</strong>
 
-                <!-- INFORMACIÓN PRINCIPAL -->
-                <div class="card">
-                    <div class="card-header">
-                        <strong>Información de la Cita</strong>
-                    </div>
-                    <div class="card-body">
-                        <!-- ID de Cita -->
-                        <div class="detail-row">
-                            <div class="detail-label">ID de Cita:</div>
-                            <div class="detail-value" th:text="${cita.id}"></div>
-                        </div>
+                <span th:text="${error}">
+                </span>
 
-                        <!-- Paciente (Usuario) -->
-                        <div class="detail-row">
-                            <div class="detail-label">Paciente:</div>
-                            <div class="detail-value" th:text="${cita.usuario.nombre}"></div>
-                        </div>
-
-                        <!-- Email del Paciente -->
-                        <div class="detail-row">
-                            <div class="detail-label">Email Paciente:</div>
-                            <div class="detail-value" th:text="${cita.usuario.email}"></div>
-                        </div>
-
-                        <!-- Médico -->
-                        <div class="detail-row">
-                            <div class="detail-label">Médico:</div>
-                            <div class="detail-value" th:text="${cita.medico.nombre} + ' ' + ${cita.medico.apellido}"></div>
-                        </div>
-
-                        <!-- Especialidad -->
-                        <div class="detail-row">
-                            <div class="detail-label">Especialidad:</div>
-                            <div class="detail-value" th:text="${cita.medico.especialidad}"></div>
-                        </div>
-
-                        <!-- Email Médico -->
-                        <div class="detail-row">
-                            <div class="detail-label">Email Médico:</div>
-                            <div class="detail-value" th:text="${cita.medico.email}"></div>
-                        </div>
-
-                        <!-- Teléfono Médico -->
-                        <div class="detail-row">
-                            <div class="detail-label">Teléfono Médico:</div>
-                            <div class="detail-value" th:text="${cita.medico.telefono}"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- DETALLES DE LA FECHA Y HORA -->
-                <div class="card" style="margin-top: 1.5rem;">
-                    <div class="card-header">
-                        <strong>Fecha y Hora</strong>
-                    </div>
-                    <div class="card-body">
-                        <!-- Fecha -->
-                        <div class="detail-row">
-                            <div class="detail-label">Fecha:</div>
-                            <div class="detail-value" th:text="${#dates.format(cita.fecha, 'dd/MM/yyyy')}"></div>
-                        </div>
-
-                        <!-- Hora -->
-                        <div class="detail-row">
-                            <div class="detail-label">Hora:</div>
-                            <div class="detail-value" th:text="${cita.hora}"></div>
-                        </div>
-
-                        <!-- Fecha de Creación -->
-                        <div class="detail-row">
-                            <div class="detail-label">Creada el:</div>
-                            <div class="detail-value" 
-                                 th:text="${#dates.format(cita.fechaCreacion, 'dd/MM/yyyy HH:mm:ss')}">
-                            </div>
-                        </div>
-
-                        <!-- Estado -->
-                        <div class="detail-row">
-                            <div class="detail-label">Estado:</div>
-                            <div class="detail-value">
-                                <span th:class="'badge ' + ('PENDIENTE' == ${cita.estado} ? 'badge-pendiente' : 'CONFIRMADA' == ${cita.estado} ? 'badge-confirmada' : 'badge-cancelada')"
-                                      th:text="${cita.estado}">
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- INFORMACIÓN DE CANCELACIÓN (si está cancelada) -->
-                <div th:if="${cita.estado == 'CANCELADA'}" class="card" style="margin-top: 1.5rem; border-left: 4px solid #d32f2f;">
-                    <div class="card-header" style="background-color: #ffebee;">
-                        <strong>Información de Cancelación</strong>
-                    </div>
-                    <div class="card-body">
-                        <!-- Fecha de Cancelación -->
-                        <div class="detail-row">
-                            <div class="detail-label">Cancelada el:</div>
-                            <div class="detail-value" 
-                                 th:text="${#dates.format(cita.fechaCancelacion, 'dd/MM/yyyy HH:mm:ss')}">
-                            </div>
-                        </div>
-
-                        <!-- Motivo de Cancelación -->
-                        <div class="detail-row">
-                            <div class="detail-label">Motivo:</div>
-                            <div class="detail-value" th:text="${cita.motivoCancelacion}"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- INFORMACIÓN DE ESTADO -->
-                <div class="card" style="margin-top: 1.5rem; background-color: #f5f5f5;">
-                    <div class="card-header">
-                        <strong>¿Qué significa cada estado?</strong>
-                    </div>
-                    <div class="card-body">
-                        <dl>
-                            <dt><strong>PENDIENTE</strong></dt>
-                            <dd>La cita está esperando confirmación del médico. Recibirás una notificación cuando sea confirmada o denegada.</dd>
-                            
-                            <dt style="margin-top: 1rem;"><strong>CONFIRMADA</strong></dt>
-                            <dd>El médico ha confirmado tu cita. Puedes presentarte a la hora y fecha indicadas.</dd>
-                            
-                            <dt style="margin-top: 1rem;"><strong>CANCELADA</strong></dt>
-                            <dd>La cita ha sido cancelada. Puedes crear una nueva cita si lo deseas.</dd>
-                        </dl>
-                    </div>
-                </div>
-
-                <!-- ACCIONES -->
-                <div class="action-buttons">
-                    <a th:href="@{/citas}" class="btn btn-outline">
-                        ← Volver a Mis Citas
-                    </a>
-
-                    <!-- CANCELAR (si no está cancelada) -->
-                    <form th:if="${cita.estado != 'CANCELADA'}"
-                          th:action="@{/citas/cancelar/{id}(id=${cita.id})}"
-                          method="get"
-                          style="display: inline;">
-                        <button type="submit" 
-                                class="btn btn-danger"
-                                onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
-                            Cancelar Cita
-                        </button>
-                    </form>
-
-                    <!-- CONFIRMAR (solo admin, solo si está pendiente) -->
-                    <form th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
-                          th:action="@{/citas/confirmar/{id}(id=${cita.id})}"
-                          method="post"
-                          style="display: inline;">
-                        <button type="submit" 
-                                class="btn btn-primary"
-                                onclick="return confirm('¿Confirmar esta cita?')">
-                            Confirmar Cita
-                        </button>
-                    </form>
-                </div>
             </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
+
+            <!-- =================================================
+                 INFORMACIÓN PARA MÉDICO
+                 ================================================= -->
+            <div
+                th:if="${usuario.rol == 'MEDICO'}"
+                class="alert-medico">
+
+                <strong>Gestión médica:</strong>
+
+                Esta cita está asignada a ti.
+
+                <span
+                    th:if="${cita.estado == 'PENDIENTE'}">
+
+                    Puedes confirmarla o rechazarla utilizando
+                    las opciones disponibles al final de esta página.
+
+                </span>
+
             </div>
-        </footer>
-    </div>
+
+
+            <!-- =================================================
+                 ESTADO ACTUAL
+                 ================================================= -->
+            <div class="alert-info">
+
+                <strong>Estado Actual:</strong>
+
+
+                <!-- PENDIENTE -->
+                <span
+                    th:if="${cita.estado == 'PENDIENTE'}"
+                    class="badge badge-pendiente"
+                    style="margin-left: 0.5rem;">
+
+                    PENDIENTE
+
+                </span>
+
+
+                <!-- CONFIRMADA -->
+                <span
+                    th:if="${cita.estado == 'CONFIRMADA'}"
+                    class="badge badge-confirmada"
+                    style="margin-left: 0.5rem;">
+
+                    CONFIRMADA
+
+                </span>
+
+
+                <!-- RECHAZADA -->
+                <span
+                    th:if="${cita.estado == 'RECHAZADA'}"
+                    class="badge badge-rechazada"
+                    style="margin-left: 0.5rem;">
+
+                    RECHAZADA
+
+                </span>
+
+
+                <!-- CANCELADA -->
+                <span
+                    th:if="${cita.estado == 'CANCELADA'}"
+                    class="badge badge-cancelada"
+                    style="margin-left: 0.5rem;">
+
+                    CANCELADA
+
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 INFORMACIÓN PRINCIPAL
+                 ================================================= -->
+            <div class="card">
+
+                <div class="card-header">
+
+                    <strong>
+                        Información de la Cita
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    <!-- ID -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            ID de Cita:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.id}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- PACIENTE -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Paciente:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.usuario != null
+                                ? cita.usuario.nombre
+                                : 'Sin paciente'}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMAIL PACIENTE -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Email Paciente:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.usuario != null
+                                ? cita.usuario.email
+                                : '-'}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- MÉDICO -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Médico:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.medico != null
+                                ? cita.medico.nombre + ' ' + cita.medico.apellido
+                                : 'Sin médico'}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- ESPECIALIDAD -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Especialidad:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.medico != null
+                                ? cita.medico.especialidad
+                                : '-'}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMAIL MÉDICO -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Email Médico:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.medico != null
+                                ? cita.medico.email
+                                : '-'}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- TELÉFONO MÉDICO -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Teléfono Médico:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.medico != null
+                                ? cita.medico.telefono
+                                : '-'}">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FECHA Y HORA
+                 ================================================= -->
+            <div
+                class="card"
+                style="margin-top: 1.5rem;">
+
+                <div class="card-header">
+
+                    <strong>
+                        Fecha y Hora
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    <!-- FECHA -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Fecha:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.fecha}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- HORA -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Hora:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.hora}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- FECHA CREACIÓN -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Creada el:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.fechaCreacion}">
+                        </div>
+
+                    </div>
+
+
+                    <!-- ESTADO -->
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Estado:
+                        </div>
+
+
+                        <div class="detail-value">
+
+
+                            <span
+                                th:if="${cita.estado == 'PENDIENTE'}"
+                                class="badge badge-pendiente">
+
+                                PENDIENTE
+
+                            </span>
+
+
+                            <span
+                                th:if="${cita.estado == 'CONFIRMADA'}"
+                                class="badge badge-confirmada">
+
+                                CONFIRMADA
+
+                            </span>
+
+
+                            <span
+                                th:if="${cita.estado == 'RECHAZADA'}"
+                                class="badge badge-rechazada">
+
+                                RECHAZADA
+
+                            </span>
+
+
+                            <span
+                                th:if="${cita.estado == 'CANCELADA'}"
+                                class="badge badge-cancelada">
+
+                                CANCELADA
+
+                            </span>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INFORMACIÓN DE CANCELACIÓN
+                 ================================================= -->
+            <div
+                th:if="${cita.estado == 'CANCELADA'}"
+                class="card"
+                style="
+                    margin-top: 1.5rem;
+                    border-left: 4px solid #d32f2f;
+                ">
+
+                <div
+                    class="card-header"
+                    style="background-color: #ffebee;">
+
+                    <strong>
+                        Información de Cancelación
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="detail-row">
+
+                        <div class="detail-label">
+                            Cancelada el:
+                        </div>
+
+                        <div
+                            class="detail-value"
+                            th:text="${cita.fechaCancelacion != null
+                                ? cita.fechaCancelacion
+                                : '-'}">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INFORMACIÓN DE RECHAZO
+                 ================================================= -->
+            <div
+                th:if="${cita.estado == 'RECHAZADA'}"
+                class="card"
+                style="
+                    margin-top: 1.5rem;
+                    border-left: 4px solid #6c757d;
+                ">
+
+                <div
+                    class="card-header"
+                    style="background-color: #f1f3f5;">
+
+                    <strong>
+                        Cita Rechazada
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <p style="margin: 0;">
+
+                        Esta solicitud fue rechazada por el médico.
+
+                        El bloque horario correspondiente ha vuelto
+                        a quedar disponible para nuevas solicitudes.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SIGNIFICADO DE LOS ESTADOS
+                 ================================================= -->
+            <div
+                class="card"
+                style="
+                    margin-top: 1.5rem;
+                    background-color: #f5f5f5;
+                ">
+
+                <div class="card-header">
+
+                    <strong>
+                        ¿Qué significa cada estado?
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <dl>
+
+
+                        <!-- PENDIENTE -->
+                        <dt>
+                            <strong>
+                                PENDIENTE
+                            </strong>
+                        </dt>
+
+                        <dd>
+
+                            La solicitud está esperando la decisión
+                            del médico.
+
+                            Mientras se encuentre pendiente,
+                            ese horario permanece reservado y
+                            ningún otro paciente puede solicitarlo.
+
+                        </dd>
+
+
+                        <!-- CONFIRMADA -->
+                        <dt style="margin-top: 1rem;">
+
+                            <strong>
+                                CONFIRMADA
+                            </strong>
+
+                        </dt>
+
+                        <dd>
+
+                            El médico aceptó la cita.
+
+                            El horario continúa reservado para
+                            ese paciente.
+
+                        </dd>
+
+
+                        <!-- RECHAZADA -->
+                        <dt style="margin-top: 1rem;">
+
+                            <strong>
+                                RECHAZADA
+                            </strong>
+
+                        </dt>
+
+                        <dd>
+
+                            El médico rechazó la solicitud.
+
+                            El horario queda nuevamente disponible
+                            para otros pacientes.
+
+                        </dd>
+
+
+                        <!-- CANCELADA -->
+                        <dt style="margin-top: 1rem;">
+
+                            <strong>
+                                CANCELADA
+                            </strong>
+
+                        </dt>
+
+                        <dd>
+
+                            La cita fue cancelada.
+
+                            El horario vuelve a quedar disponible
+                            para una nueva solicitud.
+
+                        </dd>
+
+
+                    </dl>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACCIONES
+                 ================================================= -->
+            <div class="action-buttons">
+
+
+                <!-- VOLVER -->
+                <a
+                    th:href="@{/citas}"
+                    class="btn btn-outline">
+
+                    ← Volver a Citas
+
+                </a>
+
+
+                <!-- =================================================
+                     CONFIRMAR
+                     ================================================= -->
+                <form
+                    th:if="${cita.estado == 'PENDIENTE'
+                        and (usuario.rol == 'MEDICO'
+                        or usuario.rol == 'ADMIN')}"
+                    th:action="@{/citas/confirmar/{id}(id=${cita.id})}"
+                    method="post">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        onclick="return confirm(
+                            '¿Deseas confirmar esta cita?'
+                        );">
+
+                        Confirmar Cita
+
+                    </button>
+
+                </form>
+
+
+                <!-- =================================================
+                     RECHAZAR
+                     ================================================= -->
+                <form
+                    th:if="${cita.estado == 'PENDIENTE'
+                        and (usuario.rol == 'MEDICO'
+                        or usuario.rol == 'ADMIN')}"
+                    th:action="@{/citas/rechazar/{id}(id=${cita.id})}"
+                    method="post">
+
+                    <button
+                        type="submit"
+                        class="btn btn-rechazar"
+                        onclick="return confirm(
+                            '¿Estás seguro de que deseas rechazar esta cita? El horario volverá a quedar disponible.'
+                        );">
+
+                        Rechazar Cita
+
+                    </button>
+
+                </form>
+
+
+                <!-- =================================================
+                     CANCELAR
+                     ================================================= -->
+                <form
+                    th:if="${
+                        (usuario.rol == 'USUARIO'
+                        or usuario.rol == 'ADMIN')
+                        and
+                        (cita.estado == 'PENDIENTE'
+                        or cita.estado == 'CONFIRMADA')
+                    }"
+                    th:action="@{/citas/cancelar/{id}(id=${cita.id})}"
+                    method="post">
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                        onclick="return confirm(
+                            '¿Estás seguro de que deseas cancelar esta cita?'
+                        );">
+
+                        Cancelar Cita
+
+                    </button>
+
+                </form>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="footer">
+
+        <div class="container">
+
+            Hospital - Sistema de Gestión
+
+        </div>
+
+    </footer>
+
+</div>
+
 </body>
+
 </html>

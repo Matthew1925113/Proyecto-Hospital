@@ -1,11 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${medico.id} == null ? 'Nuevo Médico' : 'Editar Médico'">Médico</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title
+        th:text="${medico.id == null
+            ? 'Nuevo Médico'
+            : 'Editar Médico'}">
+
+        Médico
+
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
+
+
     <style>
+
+        /* =========================================================
+           CAJAS DE INFORMACIÓN
+           ========================================================= */
+
         .info-box {
             background-color: #e3f2fd;
             border-left: 4px solid #2196F3;
@@ -14,6 +41,8 @@
             border-radius: 4px;
             font-size: 0.9rem;
         }
+
+
         .example-box {
             background-color: #f5f5f5;
             padding: 1rem;
@@ -21,6 +50,12 @@
             margin-top: 0.5rem;
             border-left: 4px solid #666;
         }
+
+
+        /* =========================================================
+           SECCIONES
+           ========================================================= */
+
         .section-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -29,277 +64,1088 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #2196F3;
         }
+
+
+        /* =========================================================
+           DISPONIBILIDADES
+           ========================================================= */
+
         .availability-form {
             background-color: #f9f9f9;
             padding: 1.5rem;
             border-radius: 4px;
-            margin-top: 1rem;
+            margin-top: 2rem;
         }
+
+
         .add-availability-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.65rem 1rem;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 500;
         }
+
+
         .add-availability-btn:hover {
             background-color: #45a049;
         }
+
+
         .availability-list {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+
+
         .availability-item {
             padding: 1rem;
             border-bottom: 1px solid #eee;
+
             display: flex;
             justify-content: space-between;
             align-items: center;
+
+            gap: 1rem;
         }
+
+
         .availability-item:last-child {
             border-bottom: none;
         }
+
+
         .availability-info {
             flex: 1;
         }
+
+
         .availability-info strong {
             display: block;
             color: #333;
+            margin-bottom: 0.25rem;
         }
+
+
         .availability-info small {
             color: #666;
+            display: block;
         }
+
+
         .btn-small {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
-            margin-left: 0.5rem;
         }
+
+
+        .empty-availability {
+            padding: 1.5rem;
+            text-align: center;
+            color: #777;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+
+        /*
+         * Adaptación sencilla para pantallas pequeñas.
+         */
+        @media (max-width: 700px) {
+
+            .availability-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        }
+
     </style>
+
 </head>
+
+
 <body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
-                <a class="navbar-brand" th:href="@{/listaMedicos}" sec:authorize="hasAnyRole('ADMIN','USUARIO')">Hospital</a>
-                <nav class="navbar-nav" aria-label="Main navigation">
-                    <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
-                    <a class="nav-link" th:href="@{/listaMedicos}">Lista Médicos</a>
-                    <a class="nav-link" th:href="@{/listaUsuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
-                </nav>
+
+<div class="page-wrapper">
+
+
+    <!-- =========================================================
+         NAVBAR
+         ========================================================= -->
+    <header
+        class="navbar"
+        role="banner">
+
+        <div class="container">
+
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+
+                Hospital
+
+            </a>
+
+
+            <nav
+                class="navbar-nav"
+                aria-label="Main navigation">
+
+
+                <a
+                    class="nav-link"
+                    th:href="@{/inicio}">
+
+                    Inicio
+
+                </a>
+
+
+                <a
+                    class="nav-link"
+                    th:href="@{/listaMedicos}">
+
+                    Lista Médicos
+
+                </a>
+
+
+                <a
+                    class="nav-link"
+                    th:href="@{/listaUsuarios}"
+                    sec:authorize="hasRole('ADMIN')">
+
+                    Usuarios
+
+                </a>
+
+
+                <form
+                    th:action="@{/logout}"
+                    method="post"
+                    class="inline-form">
+
+                    <button
+                        type="submit"
+                        class="btn btn-link nav-link p-0">
+
+                        Cerrar Sesión
+
+                    </button>
+
+                </form>
+
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         CONTENIDO
+         ========================================================= -->
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+
+            <!-- =================================================
+                 ENCABEZADO
+                 ================================================= -->
+            <div class="page-header">
+
+                <h1
+                    th:text="${medico.id == null
+                        ? 'Nuevo Médico'
+                        : 'Editar Médico'}">
+
+                    Médico
+
+                </h1>
+
             </div>
-        </header>
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1 th:text="${medico.id} == null ? 'Nuevo Médico' : 'Editar Médico'">Médico</h1>
-                </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            <!-- =================================================
+                 MENSAJES
+                 ================================================= -->
 
-                        <!-- FORMULARIO DATOS DEL MÉDICO -->
-                        <form th:action="@{/guardarMedico}" th:object="${medico}" method="post" id="formMedico">
-                            <input type="hidden" th:field="*{id}" />
+            <!-- ERROR -->
+            <div
+                th:if="${error}"
+                class="alert alert-danger"
+                role="alert"
+                th:text="${error}">
+            </div>
 
-                            <h2 class="section-title">Información Personal</h2>
 
-                            <div class="form-group">
-                                <label for="nombre" class="form-label">
-                                    <span style="color: red;">*</span> Nombre
-                                </label>
-                                <input type="text" id="nombre" th:field="*{nombre}" class="form-input" placeholder="Ingrese el nombre" required>
-                            </div>
+            <!-- ÉXITO -->
+            <div
+                th:if="${success}"
+                class="alert alert-success"
+                role="alert"
+                th:text="${success}">
+            </div>
 
-                            <div class="form-group">
-                                <label for="apellido" class="form-label">
-                                    <span style="color: red;">*</span> Apellido
-                                </label>
-                                <input type="text" id="apellido" th:field="*{apellido}" class="form-input" placeholder="Ingrese el apellido" required>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="cedula" class="form-label">
-                                    <span style="color: red;">*</span> Cédula
-                                </label>
-                                <input type="text" id="cedula" th:field="*{cedula}" class="form-input" placeholder="Ingrese la cédula" required>
-                            </div>
+            <!-- =================================================
+                 DATOS DEL MÉDICO
+                 ================================================= -->
+            <div class="card">
 
-                            <div class="form-group">
-                                <label for="email" class="form-label">
-                                    <span style="color: red;">*</span> Email
-                                </label>
-                                <input type="email" id="email" th:field="*{email}" class="form-input" placeholder="Ingrese el email" required>
-                            </div>
+                <div class="card-body">
 
-                            <div class="form-group">
-                                <label for="direccion" class="form-label">
-                                    <span style="color: red;">*</span> Dirección
-                                </label>
-                                <input type="text" id="direccion" th:field="*{direccion}" class="form-input" placeholder="Ingrese la dirección" required>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="telefono" class="form-label">
-                                    <span style="color: red;">*</span> Teléfono
-                                </label>
-                                <input type="text" id="telefono" th:field="*{telefono}" class="form-input" placeholder="Ingrese el teléfono" required>
-                            </div>
+                    <form
+                        th:action="@{/guardarMedico}"
+                        th:object="${medico}"
+                        method="post"
+                        id="formMedico">
 
-                            <div class="form-group">
-                                <label for="especialidad" class="form-label">
-                                    <span style="color: red;">*</span> Especialidad
-                                </label>
-                                <input type="text" id="especialidad" th:field="*{especialidad}" class="form-input" placeholder="Ej: Cardiología, Pediatría, etc." required>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="disponibilidadHoraria" class="form-label">
-                                    <span style="color: red;">*</span> Disponibilidad Horaria (Horario General)
-                                </label>
+                        <input
+                            type="hidden"
+                            th:field="*{id}">
 
-                                <div class="info-box">
-                                    <strong>Información:</strong>
-                                    <p>Defina el horario general de atención del médico. Los espacios específicos se crean por separado abajo.</p>
-                                    <div class="example-box">
-                                        <strong>Ejemplos válidos:</strong><br>
-                                        • <code>08:00-12:30</code><br>
-                                        • <code>08:00-12:00,14:00-18:00</code>
-                                    </div>
+
+                        <!-- =====================================
+                             INFORMACIÓN PERSONAL
+                             ===================================== -->
+                        <h2 class="section-title">
+
+                            Información Personal
+
+                        </h2>
+
+
+                        <!-- NOMBRE -->
+                        <div class="form-group">
+
+                            <label
+                                for="nombre"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Nombre
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="nombre"
+                                th:field="*{nombre}"
+                                class="form-input"
+                                placeholder="Ingrese el nombre"
+                                required>
+
+                        </div>
+
+
+                        <!-- APELLIDO -->
+                        <div class="form-group">
+
+                            <label
+                                for="apellido"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Apellido
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="apellido"
+                                th:field="*{apellido}"
+                                class="form-input"
+                                placeholder="Ingrese el apellido"
+                                required>
+
+                        </div>
+
+
+                        <!-- CÉDULA -->
+                        <div class="form-group">
+
+                            <label
+                                for="cedula"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Cédula
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="cedula"
+                                th:field="*{cedula}"
+                                class="form-input"
+                                placeholder="Ingrese la cédula"
+                                required>
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+                        <div class="form-group">
+
+                            <label
+                                for="email"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Email
+
+                            </label>
+
+
+                            <input
+                                type="email"
+                                id="email"
+                                th:field="*{email}"
+                                class="form-input"
+                                placeholder="Ingrese el email"
+                                required>
+
+
+                            <small
+                                style="
+                                    display: block;
+                                    margin-top: 0.4rem;
+                                    color: #666;
+                                ">
+
+                                Si este médico tendrá acceso al sistema,
+                                su cuenta con rol MEDICO deberá utilizar
+                                exactamente este mismo correo.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- DIRECCIÓN -->
+                        <div class="form-group">
+
+                            <label
+                                for="direccion"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Dirección
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="direccion"
+                                th:field="*{direccion}"
+                                class="form-input"
+                                placeholder="Ingrese la dirección"
+                                required>
+
+                        </div>
+
+
+                        <!-- TELÉFONO -->
+                        <div class="form-group">
+
+                            <label
+                                for="telefono"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Teléfono
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="telefono"
+                                th:field="*{telefono}"
+                                class="form-input"
+                                placeholder="Ingrese el teléfono"
+                                required>
+
+                        </div>
+
+
+                        <!-- ESPECIALIDAD -->
+                        <div class="form-group">
+
+                            <label
+                                for="especialidad"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Especialidad
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="especialidad"
+                                th:field="*{especialidad}"
+                                class="form-input"
+                                placeholder="Ej: Cardiología, Pediatría, etc."
+                                required>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             HORARIO GENERAL
+                             ===================================== -->
+                        <h2 class="section-title">
+
+                            Horario General
+
+                        </h2>
+
+
+                        <div class="form-group">
+
+                            <label
+                                for="disponibilidadHoraria"
+                                class="form-label">
+
+                                <span style="color: red;">
+                                    *
+                                </span>
+
+                                Disponibilidad Horaria
+
+                            </label>
+
+
+                            <div class="info-box">
+
+                                <strong>
+                                    Información:
+                                </strong>
+
+
+                                <p>
+
+                                    Define el horario general de atención
+                                    del médico.
+
+                                </p>
+
+
+                                <div class="example-box">
+
+                                    <strong>
+                                        Ejemplos válidos:
+                                    </strong>
+
+                                    <br>
+
+                                    •
+                                    <code>
+                                        08:00-12:00
+                                    </code>
+
+                                    <br>
+
+                                    •
+                                    <code>
+                                        08:00-12:00,14:00-18:00
+                                    </code>
+
                                 </div>
 
-                                <input type="text" 
-                                       id="disponibilidadHoraria" 
-                                       th:field="*{disponibilidadHoraria}" 
-                                       class="form-input" 
-                                       placeholder="Ej: 08:00-12:00,14:00-18:00" 
-                                       required>
                             </div>
 
-                            <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
-                                <button type="submit" class="btn btn-primary">Guardar Médico</button>
-                                <a th:href="@{/listaMedicos}" class="btn btn-outline">Cancelar</a>
-                            </div>
+
+                            <input
+                                type="text"
+                                id="disponibilidadHoraria"
+                                th:field="*{disponibilidadHoraria}"
+                                class="form-input"
+                                placeholder="Ej: 08:00-12:00,14:00-18:00"
+                                required>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             BOTONES
+                             ===================================== -->
+                        <div
+                            style="
+                                display: flex;
+                                gap: 0.75rem;
+                                margin-top: 2rem;
+                                flex-wrap: wrap;
+                            ">
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+
+                                Guardar Médico
+
+                            </button>
+
+
+                            <a
+                                th:href="@{/listaMedicos}"
+                                class="btn btn-outline">
+
+                                Cancelar
+
+                            </a>
+
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DISPONIBILIDADES ESPECÍFICAS
+                 =================================================
+                 Solo pueden administrarse después de guardar
+                 el médico, porque necesitamos su ID.
+                 ================================================= -->
+            <div
+                th:if="${medico.id != null}"
+                class="availability-form">
+
+
+                <h2
+                    class="section-title"
+                    style="margin-top: 0;">
+
+                    Espacios de Disponibilidad
+
+                </h2>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        Disponibilidades para citas
+                    </strong>
+
+
+                    <p style="margin-bottom: 0;">
+
+                        Estos son los espacios que los pacientes
+                        podrán utilizar para solicitar citas.
+
+                        Una disponibilidad no puede solaparse con
+                        otra disponibilidad activa del mismo médico
+                        en la misma fecha.
+
+                    </p>
+
+                </div>
+
+
+                <!-- =============================================
+                     CREAR DISPONIBILIDAD
+                     ============================================= -->
+                <form
+                    th:action="@{/disponibilidades/crear}"
+                    method="post"
+                    id="formDisponibilidad">
+
+
+                    <input
+                        type="hidden"
+                        name="medicoId"
+                        th:value="${medico.id}">
+
+
+                    <!-- FECHA -->
+                    <div class="form-group">
+
+                        <label
+                            for="fechaStr"
+                            class="form-label">
+
+                            <span style="color: red;">
+                                *
+                            </span>
+
+                            Fecha
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="fechaStr"
+                            name="fechaStr"
+                            class="form-input"
+                            required>
+
+                    </div>
+
+
+                    <!-- HORA INICIO -->
+                    <div class="form-group">
+
+                        <label
+                            for="horaInicioStr"
+                            class="form-label">
+
+                            <span style="color: red;">
+                                *
+                            </span>
+
+                            Hora Inicio
+
+                        </label>
+
+
+                        <input
+                            type="time"
+                            id="horaInicioStr"
+                            name="horaInicioStr"
+                            class="form-input"
+                            required>
+
+                    </div>
+
+
+                    <!-- HORA FIN -->
+                    <div class="form-group">
+
+                        <label
+                            for="horaFinStr"
+                            class="form-label">
+
+                            <span style="color: red;">
+                                *
+                            </span>
+
+                            Hora Fin
+
+                        </label>
+
+
+                        <input
+                            type="time"
+                            id="horaFinStr"
+                            name="horaFinStr"
+                            class="form-input"
+                            required>
+
+                    </div>
+
+
+                    <!--
+                        IMPORTANTE:
+
+                        Ya NO tenemos un campo "descripcion".
+
+                        DisponibilidadMedica no posee ese atributo,
+                        por lo tanto no debemos enviarlo ni mostrarlo.
+                    -->
+
+
+                    <button
+                        type="submit"
+                        class="add-availability-btn">
+
+                        + Agregar Disponibilidad
+
+                    </button>
+
+                </form>
+
+
+                <!-- =============================================
+                     LISTA DE DISPONIBILIDADES
+                     ============================================= -->
+                <div
+                    th:if="${disponibilidades != null
+                        and !#lists.isEmpty(disponibilidades)}"
+                    class="availability-list">
+
+
+                    <div
+                        th:each="disp : ${disponibilidades}"
+                        class="availability-item">
+
+
+                        <!-- INFORMACIÓN -->
+                        <div class="availability-info">
+
+
+                            <strong>
+
+                                Fecha:
+                                <span th:text="${disp.fecha}">
+                                </span>
+
+                            </strong>
+
+
+                            <small>
+
+                                Horario:
+
+                                <span th:text="${disp.horaInicio}">
+                                </span>
+
+                                -
+
+                                <span th:text="${disp.horaFin}">
+                                </span>
+
+                            </small>
+
+
+                            <small>
+
+                                Estado:
+
+                                <span
+                                    th:text="${disp.activo
+                                        ? 'Activa'
+                                        : 'Inactiva'}">
+
+                                    Activa
+
+                                </span>
+
+                            </small>
+
+
+                        </div>
+
+
+                       
+                        <form
+                            th:action="@{/disponibilidades/eliminar/{id}(id=${disp.id})}"
+                            method="post">
+
+
+                            <!--
+                                El controlador necesita saber a qué
+                                médico regresar después de eliminar.
+                            -->
+                            <input
+                                type="hidden"
+                                name="medicoId"
+                                th:value="${medico.id}">
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger btn-small"
+                                onclick="return confirm(
+                                    '¿Estás seguro de que deseas eliminar este espacio de disponibilidad?'
+                                );">
+
+                                Eliminar
+
+                            </button>
+
+
                         </form>
 
-                        <!-- FORMULARIO CREAR DISPONIBILIDADES (solo si el médico ya existe) -->
-                        <div th:if="${medico.id != null}" class="availability-form">
-                            <h2 class="section-title">Crear Espacios de Disponibilidad</h2>
-                            
-                            <div class="info-box">
-                                <strong>📅 Espacios Específicos:</strong>
-                                <p>Crea horarios específicos para que los pacientes puedan reservar citas. Puedes crear múltiples espacios por día.</p>
-                            </div>
-
-                            <form th:action="@{/disponibilidades/crear}" method="post" id="formDisponibilidad">
-                                <input type="hidden" name="medicoId" th:value="${medico.id}" />
-
-                                <div class="form-group">
-                                    <label for="fechaStr" class="form-label">
-                                        <span style="color: red;">*</span> Fecha
-                                    </label>
-                                    <input type="date" 
-                                           id="fechaStr" 
-                                           name="fechaStr" 
-                                           class="form-input" 
-                                           required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="horaInicioStr" class="form-label">
-                                        <span style="color: red;">*</span> Hora Inicio
-                                    </label>
-                                    <input type="time" 
-                                           id="horaInicioStr" 
-                                           name="horaInicioStr" 
-                                           class="form-input" 
-                                           required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="horaFinStr" class="form-label">
-                                        <span style="color: red;">*</span> Hora Fin
-                                    </label>
-                                    <input type="time" 
-                                           id="horaFinStr" 
-                                           name="horaFinStr" 
-                                           class="form-input" 
-                                           required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="descripcion" class="form-label">Descripción (opcional)</label>
-                                    <textarea id="descripcion" 
-                                              name="descripcion" 
-                                              class="form-input" 
-                                              rows="2"
-                                              placeholder="Ej: Consulta de rutina, revisión especial, etc."></textarea>
-                                </div>
-
-                                <button type="submit" class="add-availability-btn">+ Agregar Disponibilidad</button>
-                            </form>
-
-                            <div th:if="${disponibilidades != null and !disponibilidades.isEmpty()}" class="availability-list">
-                                <div th:each="disp : ${disponibilidades}" class="availability-item">
-                                    <div class="availability-info">
-                                        <strong th:text="${#dates.format(disp.fecha, 'dd/MM/yyyy')}"></strong>
-                                        <small th:text="${disp.horaInicio} + ' - ' + ${disp.horaFin}"></small>
-                                        <small th:if="${disp.descripcion}" th:text="'Descripción: ' + ${disp.descripcion}" style="display: block; margin-top: 0.25rem;"></small>
-                                    </div>
-                                    <a th:href="@{/disponibilidades/eliminar/{id}(id=${disp.id})}" 
-                                       class="btn btn-sm btn-danger btn-small"
-                                       onclick="return confirm('¿Eliminar este espacio?')">Eliminar</a>
-                                </div>
-                            </div>
-                            <div th:if="${disponibilidades == null or disponibilidades.isEmpty()}" style="padding: 1rem; text-align: center; color: #999;">
-                                No hay disponibilidades creadas aún
-                            </div>
-                        </div>
                     </div>
+
                 </div>
+
+
+                <!-- =============================================
+                     SIN DISPONIBILIDADES
+                     ============================================= -->
+                <div
+                    th:if="${disponibilidades == null
+                        or #lists.isEmpty(disponibilidades)}"
+                    class="empty-availability">
+
+                    No hay disponibilidades activas para este médico.
+
+                </div>
+
             </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
+
+            <!-- =================================================
+                 MÉDICO NUEVO
+                 ================================================= -->
+            <div
+                th:if="${medico.id == null}"
+                class="info-box"
+                style="margin-top: 1.5rem;">
+
+                <strong>
+                    Disponibilidades:
+                </strong>
+
+                Guarda primero el médico.
+
+                Después podrás administrar sus espacios específicos
+                de disponibilidad.
+
             </div>
-        </footer>
-    </div>
 
-    <script>
-        document.getElementById('formMedico').addEventListener('submit', function(e) {
-            const disponibilidad = document.getElementById('disponibilidadHoraria').value.trim();
-            
-            if (!disponibilidad) {
-                e.preventDefault();
-                alert('Por favor ingresa la disponibilidad horaria');
-                return false;
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="footer">
+
+        <div class="container">
+
+            Hospital - Sistema de Gestión
+
+        </div>
+
+    </footer>
+
+</div>
+
+
+<!-- =============================================================
+     JAVASCRIPT
+     ============================================================= -->
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            /*
+             * =====================================================
+             * VALIDAR HORARIO GENERAL
+             * =====================================================
+             */
+            const formMedico =
+                document.getElementById(
+                    "formMedico"
+                );
+
+
+            if (formMedico) {
+
+                formMedico.addEventListener(
+                    "submit",
+                    function (e) {
+
+                        const campoDisponibilidad =
+                            document.getElementById(
+                                "disponibilidadHoraria"
+                            );
+
+
+                        if (!campoDisponibilidad) {
+                            return;
+                        }
+
+
+                        const disponibilidad =
+                            campoDisponibilidad
+                                .value
+                                .trim();
+
+
+                        if (!disponibilidad) {
+
+                            e.preventDefault();
+
+
+                            alert(
+                                "Por favor ingresa la disponibilidad horaria."
+                            );
+
+
+                            return;
+                        }
+
+
+                        /*
+                         * Validación básica del formato.
+                         *
+                         * La validación definitiva también
+                         * se realiza en el backend.
+                         */
+                        if (
+                            !disponibilidad.includes(":")
+                            ||
+                            !disponibilidad.includes("-")
+                        ) {
+
+                            e.preventDefault();
+
+
+                            alert(
+                                "Formato inválido. "
+                                + "Ejemplo: 08:00-12:00 "
+                                + "o 08:00-12:00,14:00-18:00"
+                            );
+                        }
+
+                    }
+                );
             }
 
-            if (!disponibilidad.includes(':') || !disponibilidad.includes('-')) {
-                e.preventDefault();
-                alert('Formato inválido. Ejemplo correcto: 08:00-12:00 o 08:00-12:00,14:00-18:00');
-                return false;
-            }
-        });
 
-        document.getElementById('formDisponibilidad').addEventListener('submit', function(e) {
-            const horaInicio = document.getElementById('horaInicioStr').value;
-            const horaFin = document.getElementById('horaFinStr').value;
+            const formDisponibilidad =
+                document.getElementById(
+                    "formDisponibilidad"
+                );
 
-            if (horaInicio >= horaFin) {
-                e.preventDefault();
-                alert('Hora inicio debe ser menor que hora fin');
-                return false;
+
+            if (formDisponibilidad) {
+
+                formDisponibilidad.addEventListener(
+                    "submit",
+                    function (e) {
+
+                        const horaInicio =
+                            document
+                                .getElementById(
+                                    "horaInicioStr"
+                                )
+                                .value;
+
+
+                        const horaFin =
+                            document
+                                .getElementById(
+                                    "horaFinStr"
+                                )
+                                .value;
+
+
+                        if (
+                            !horaInicio
+                            || !horaFin
+                        ) {
+
+                            return;
+                        }
+
+
+                        if (
+                            horaInicio >= horaFin
+                        ) {
+
+                            e.preventDefault();
+
+
+                            alert(
+                                "La hora de inicio debe ser menor que la hora final."
+                            );
+
+
+                            return;
+                        }
+
+                    }
+                );
+
+
+                const fechaInput =
+                    document.getElementById(
+                        "fechaStr"
+                    );
+
+
+                if (fechaInput) {
+
+                    const hoy =
+                        new Date();
+
+
+                    const year =
+                        hoy.getFullYear();
+
+
+                    const month =
+                        String(
+                            hoy.getMonth() + 1
+                        )
+                        .padStart(
+                            2,
+                            "0"
+                        );
+
+
+                    const day =
+                        String(
+                            hoy.getDate()
+                        )
+                        .padStart(
+                            2,
+                            "0"
+                        );
+
+
+                    fechaInput.min =
+                        year
+                        + "-"
+                        + month
+                        + "-"
+                        + day;
+                }
             }
-        });
-    </script>
+
+        }
+    );
+
+</script>
+
 </body>
+
 </html>

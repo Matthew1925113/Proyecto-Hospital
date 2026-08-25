@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Nueva Cita</title>
+
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
     <style>
+
         .info-box {
             background-color: #e3f2fd;
             border-left: 4px solid #2196F3;
@@ -13,6 +17,7 @@
             margin-bottom: 1.5rem;
             border-radius: 4px;
         }
+
         .medico-card {
             background-color: #f9f9f9;
             padding: 1rem;
@@ -22,22 +27,29 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .medico-card:hover {
             background-color: #f0f7ff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
+
         .medico-card.active {
             background-color: #e3f2fd;
             border-left-color: #1976d2;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.20);
         }
+
         .medico-card strong {
             display: block;
             color: #333;
             margin-bottom: 0.25rem;
         }
+
         .medico-card small {
             color: #666;
         }
+
         .section-title {
             font-size: 1.1rem;
             font-weight: 600;
@@ -46,272 +58,927 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #2196F3;
         }
+
         .horario-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns:
+                repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
+
         .horario-option {
             padding: 1rem;
             border: 2px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            background-color: white;
+            user-select: none;
         }
+
         .horario-option:hover {
             border-color: #2196F3;
             background-color: #e3f2fd;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(33, 150, 243, 0.15);
         }
+
         .horario-option.selected {
             border-color: #1976d2;
-            background-color: #e3f2fd;
+            background-color: #1976d2;
+            color: white;
             font-weight: 600;
+            box-shadow: 0 3px 10px rgba(25, 118, 210, 0.25);
         }
-        .horario-option.inactivo {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-color: #ccc;
-            background-color: #f5f5f5;
+
+        .horario-option.selected .horario-tiempo {
+            color: white;
         }
+
+        .horario-option.selected .horario-disponible {
+            color: #e3f2fd;
+        }
+
         .horario-tiempo {
             font-weight: 600;
             color: #333;
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
+            font-size: 1rem;
+            margin-bottom: 0.35rem;
         }
+
         .horario-disponible {
             color: #666;
-            font-size: 0.8rem;
+            font-size: 0.80rem;
         }
+
         .no-horarios {
             padding: 2rem;
             text-align: center;
-            color: #999;
+            color: #777;
             background-color: #f5f5f5;
-            border-radius: 4px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
         }
+
         .medicos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns:
+                repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
+
         .fecha-selector {
             background-color: #f9f9f9;
             padding: 1.5rem;
             border-radius: 4px;
             margin-bottom: 2rem;
         }
+
+        .cargando-horarios {
+            padding: 2rem;
+            text-align: center;
+            color: #666;
+        }
+
+        .duracion-info {
+            background-color: #f5f9ff;
+            border-left: 4px solid #2196F3;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
+
 <body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
-                <nav class="navbar-nav" aria-label="Main navigation">
-                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
-                    <a class="nav-link" th:href="@{/citas}">Mis Citas</a>
-                    <form th:action="@{/logout}" method="post" class="inline-form">
-                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
+
+<div class="page-wrapper">
+
+    <header class="navbar" role="banner">
+
+        <div class="container">
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+                Hospital
+            </a>
+
+            <nav
+                class="navbar-nav"
+                aria-label="Main navigation">
+
+                <a
+                    class="nav-link"
+                    th:href="@{/inicio}">
+                    Inicio
+                </a>
+
+                <a
+                    class="nav-link"
+                    th:href="@{/citas}">
+                    Mis Citas
+                </a>
+
+                <form
+                    th:action="@{/logout}"
+                    method="post"
+                    class="inline-form">
+
+                    <button
+                        type="submit"
+                        class="btn btn-link nav-link p-0">
+                        Cerrar Sesión
+                    </button>
+
+                </form>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+            <div class="page-header">
+                <h1>Reservar Nueva Cita</h1>
+            </div>
+
+
+            <!-- MENSAJE DE ERROR -->
+
+            <div
+                th:if="${error}"
+                class="alert alert-danger">
+
+                <strong>Error:</strong>
+
+                <span th:text="${error}"></span>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <form
+                        th:action="@{/citas/reservar}"
+                        method="post"
+                        id="formCita">
+
+
+                        <h3 class="section-title">
+                            Paso 1: Selecciona una Fecha
+                        </h3>
+
+
+                        <div class="fecha-selector">
+
+                            <div class="form-group">
+
+                                <label
+                                    for="fechaSeleccionada"
+                                    class="form-label">
+
+                                    <span style="color: red;">
+                                        *
+                                    </span>
+
+                                    Fecha
+
+                                </label>
+
+
+                                <input
+                                    type="date"
+                                    id="fechaSeleccionada"
+                                    class="form-input"
+                                    required>
+
+                            </div>
+
+                        </div>
+
+                        <h3 class="section-title">
+                            Paso 2: Selecciona un Médico
+                        </h3>
+
+
+                        <div
+                            class="medicos-grid"
+                            id="medicosContainer">
+
+
+                            <div
+                                th:each="medico : ${medicos}"
+                                class="medico-card"
+
+                                th:onclick="
+                                    'seleccionarMedico(this, '
+                                    + ${medico.id}
+                                    + ')'">
+
+
+                                <strong
+                                    th:text="
+                                        ${medico.nombre}
+                                        + ' '
+                                        + ${medico.apellido}">
+                                </strong>
+
+
+                                <small
+                                    th:text="${medico.especialidad}">
+                                </small>
+
+
+                                <small
+                                    style="
+                                        display: block;
+                                        margin-top: 0.25rem;
+                                    "
+
+                                    th:text="
+                                        '📞 '
+                                        + ${medico.telefono}">
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="horariosDiv"
+                            style="display: none;">
+
+
+                            <h3 class="section-title">
+                                Paso 3: Selecciona la Hora de tu Cita
+                            </h3>
+
+
+                            <div class="duracion-info">
+
+                                Las citas tienen una duración de
+                                <strong>1 hora</strong>.
+
+                                Selecciona el horario que mejor
+                                se adapte a tu disponibilidad.
+
+                            </div>
+
+
+                            <div id="horariosContent">
+                            </div>
+
+                        </div>
+
+                        <input
+                            type="hidden"
+                            id="disponibilidadId"
+                            name="disponibilidadId"
+                            value="">
+
+
+
+                        <input
+                            type="hidden"
+                            id="horaSeleccionada"
+                            name="horaSeleccionada"
+                            value="">
+
+                        <div
+                            style="
+                                display: flex;
+                                gap: 0.75rem;
+                                margin-top: 2rem;
+                            ">
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="submitBtn"
+                                disabled>
+
+                                Reservar Cita
+
+                            </button>
+
+
+                            <a
+                                th:href="@{/citas}"
+                                class="btn btn-outline">
+
+                                Cancelar
+
+                            </a>
+
+                        </div>
+
                     </form>
-                </nav>
-            </div>
-        </header>
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1>Reservar Nueva Cita</h1>
                 </div>
 
-                <div th:if="${error}" class="alert alert-danger">
-                    <strong>Error:</strong> <span th:text="${error}"></span>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <form th:action="@{/citas/reservar}" method="post" id="formCita">
-                            
-                            <!-- PASO 1: SELECCIONAR FECHA -->
-                            <h3 class="section-title">Paso 1: Selecciona una Fecha</h3>
-                            <div class="fecha-selector">
-                                <div class="form-group">
-                                    <label for="fechaSeleccionada" class="form-label">
-                                        <span style="color: red;">*</span> Fecha
-                                    </label>
-                                    <input type="date" 
-                                           id="fechaSeleccionada" 
-                                           class="form-input"
-                                           required>
-                                </div>
-                            </div>
-
-                            <!-- PASO 2: SELECCIONAR MÉDICO -->
-                            <h3 class="section-title">Paso 2: Selecciona un Médico</h3>
-                            <div class="medicos-grid" id="medicosContainer">
-                                <div th:each="medico : ${medicos}" 
-                                     class="medico-card"
-                                     th:onclick="'seleccionarMedico(this, ' + ${medico.id} + ')'">
-                                    <strong th:text="${medico.nombre} + ' ' + ${medico.apellido}"></strong>
-                                    <small th:text="${medico.especialidad}"></small>
-                                    <small style="display: block; margin-top: 0.25rem;" th:text="'📞 ' + ${medico.telefono}"></small>
-                                </div>
-                            </div>
-
-                            <!-- PASO 3: SELECCIONAR HORA -->
-                            <div id="horariosDiv" style="display: none;">
-                                <h3 class="section-title">Paso 3: Selecciona la Hora de Inicio de tu Cita</h3>
-                                <div id="horariosContent"></div>
-                            </div>
-
-                            <input type="hidden" id="disponibilidadId" name="disponibilidadId" value="">
-
-                            <div style="display: flex; gap: 0.75rem; margin-top: 2rem;">
-                                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Reservar Cita</button>
-                                <a th:href="@{/citas}" class="btn btn-outline">Cancelar</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
-            </div>
-        </footer>
-    </div>
+        </div>
 
-    <script th:inline="javascript">
-        let medicoSeleccionado = null;
-        let fechaSeleccionada = null;
-        let disponibilidadSeleccionada = null;
+    </main>
 
-        const todasDisponibilidades = /*[[${disponibilidades}]]*/ [];
+    <footer class="footer">
 
-        // Establecer fecha mínima a hoy
-        document.getElementById('fechaSeleccionada').min = new Date().toISOString().split('T')[0];
+        <div class="container">
+            Hospital - Sistema de Gestión
+        </div>
 
-        // Al cambiar la fecha, limpiar selecciones
-        document.getElementById('fechaSeleccionada').addEventListener('change', function(e) {
-            fechaSeleccionada = e.target.value;
+    </footer>
+
+</div>
+
+<script th:inline="javascript">
+
+    let medicoSeleccionado = null;
+
+    let fechaSeleccionada = null;
+
+    let disponibilidadSeleccionada = null;
+
+    let horaSeleccionada = null;
+
+    const todasDisponibilidades =
+        /*[[${disponibilidades}]]*/ [];
+
+
+    const inputFecha =
+        document.getElementById('fechaSeleccionada');
+
+
+    const hoy = new Date();
+
+    const anio = hoy.getFullYear();
+
+    const mes =
+        String(hoy.getMonth() + 1)
+            .padStart(2, '0');
+
+    const dia =
+        String(hoy.getDate())
+            .padStart(2, '0');
+
+
+    inputFecha.min =
+        anio + '-' + mes + '-' + dia;
+
+    inputFecha.addEventListener(
+        'change',
+
+        function (e) {
+
+            fechaSeleccionada =
+                e.target.value;
+
             medicoSeleccionado = null;
+
             disponibilidadSeleccionada = null;
-            
-            document.querySelectorAll('.medico-card').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            document.getElementById('horariosDiv').style.display = 'none';
-            document.getElementById('disponibilidadId').value = '';
+
+            horaSeleccionada = null;
+
+            document
+                .querySelectorAll('.medico-card')
+                .forEach(el => {
+
+                    el.classList.remove('active');
+
+                });
+
+            document
+                .getElementById('horariosDiv')
+                .style.display = 'none';
+
+            limpiarHorarioSeleccionado();
+
+
             actualizarBoton();
-            
-            console.log("Fecha seleccionada:", fechaSeleccionada);
-        });
 
-        function seleccionarMedico(element, medicoId) {
-            if (!fechaSeleccionada) {
-                alert('Por favor selecciona una fecha primero');
-                return;
-            }
 
-            console.log("Seleccionando médico:", medicoId, "para fecha:", fechaSeleccionada);
-            
-            document.querySelectorAll('.medico-card').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            element.classList.add('active');
-            medicoSeleccionado = medicoId;
+            console.log(
+                'Fecha seleccionada:',
+                fechaSeleccionada
+            );
+        }
+    );
 
-            cargarHorarios(medicoId, fechaSeleccionada);
+    function seleccionarMedico(
+        element,
+        medicoId
+    ) {
+
+        if (!fechaSeleccionada) {
+
+            alert(
+                'Por favor selecciona una fecha primero'
+            );
+
+            return;
         }
 
-        function cargarHorarios(medicoId, fecha) {
-            console.log("Cargando horarios para médico:", medicoId, "en fecha:", fecha);
-            console.log("Total disponibilidades:", todasDisponibilidades.length);
-            
-            const dispDelMedicoYFecha = todasDisponibilidades.filter(d => {
-                return d.medico && d.medico.id === medicoId && d.fecha === fecha && d.activo === true;
+
+        console.log(
+            'Seleccionando médico:',
+            medicoId,
+            'para fecha:',
+            fechaSeleccionada
+        );
+
+        document
+            .querySelectorAll('.medico-card')
+            .forEach(el => {
+
+                el.classList.remove('active');
+
             });
 
-            console.log("Disponibilidades filtradas:", dispDelMedicoYFecha.length);
+        element.classList.add('active');
 
-            if (dispDelMedicoYFecha.length === 0) {
-                document.getElementById('horariosDiv').style.display = 'block';
-                document.getElementById('horariosContent').innerHTML = 
-                    '<div class="no-horarios">Este médico no tiene horarios disponibles para esta fecha.</div>';
-                disponibilidadSeleccionada = null;
-                actualizarBoton();
-                return;
-            }
 
-            let html = '<div class="horario-grid">';
-            
-            dispDelMedicoYFecha.forEach(disp => {
-                const estaActiva = disp.activo === true;
-                html += '<div class="horario-option ' + (estaActiva ? '' : 'inactivo') + '" ';
-                
-                if (estaActiva) {
-                    html += 'onclick="seleccionarHorario(this, ' + disp.id + ')">';
-                } else {
-                    html += 'style="cursor: not-allowed;">';
+        medicoSeleccionado = medicoId;
+
+        disponibilidadSeleccionada = null;
+
+        horaSeleccionada = null;
+
+
+        limpiarHorarioSeleccionado();
+
+
+        actualizarBoton();
+
+        cargarDisponibilidadesMedico(
+            medicoId,
+            fechaSeleccionada
+        );
+    }
+
+    function cargarDisponibilidadesMedico(
+        medicoId,
+        fecha
+    ) {
+
+        console.log(
+            'Buscando disponibilidades para médico:',
+            medicoId,
+            'fecha:',
+            fecha
+        );
+
+        const disponibilidades =
+            todasDisponibilidades.filter(d => {
+
+                if (!d.medico) {
+                    return false;
                 }
-                
-                html += '<div class="horario-tiempo">' + disp.horaInicio + '</div>';
-                html += '<div class="horario-disponible">' + disp.horaFin + '</div>';
-                html += '</div>';
+
+
+                return (
+                    Number(d.medico.id) === Number(medicoId)
+                    &&
+                    d.fecha === fecha
+                    &&
+                    d.activo === true
+                );
             });
 
-            html += '</div>';
 
-            document.getElementById('horariosDiv').style.display = 'block';
-            document.getElementById('horariosContent').innerHTML = html;
+        console.log(
+            'Disponibilidades encontradas:',
+            disponibilidades
+        );
+
+        document
+            .getElementById('horariosDiv')
+            .style.display = 'block';
+
+        if (disponibilidades.length === 0) {
+
+            document
+                .getElementById('horariosContent')
+                .innerHTML =
+
+                '<div class="no-horarios">'
+                +
+                'Este médico no tiene horarios disponibles '
+                +
+                'para esta fecha.'
+                +
+                '</div>';
+
+
+            return;
+        }
+
+        cargarHorariosDeDisponibilidades(
+            disponibilidades
+        );
+    }
+
+    async function cargarHorariosDeDisponibilidades(
+        disponibilidades
+    ) {
+
+        const contenedor =
+            document.getElementById(
+                'horariosContent'
+            );
+
+
+        contenedor.innerHTML =
+            '<div class="cargando-horarios">'
+            +
+            'Cargando horarios disponibles...'
+            +
+            '</div>';
+
+
+        try {
+
+            const peticiones =
+                disponibilidades.map(
+                    disponibilidad => {
+
+                        return fetch(
+                            '/citas/horarios-disponibles'
+                            +
+                            '?disponibilidadId='
+                            +
+                            encodeURIComponent(
+                                disponibilidad.id
+                            )
+                        )
+                        .then(response => {
+
+                            if (!response.ok) {
+
+                                throw new Error(
+                                    'Error HTTP '
+                                    +
+                                    response.status
+                                );
+                            }
+
+
+                            return response.json();
+                        });
+                    }
+                );
+
+            const respuestas =
+                await Promise.all(peticiones);
+
+            let horarios = [];
+
+
+            respuestas.forEach(lista => {
+
+                horarios =
+                    horarios.concat(lista);
+
+            });
+
+            horarios.sort(
+                (a, b) => {
+
+                    return a.horaInicio
+                        .localeCompare(
+                            b.horaInicio
+                        );
+                }
+            );
+
+
+            mostrarHorarios(horarios);
+
+
+        } catch (error) {
+
+            console.error(
+                'Error cargando horarios:',
+                error
+            );
+
+
+            contenedor.innerHTML =
+                '<div class="no-horarios">'
+                +
+                'No se pudieron cargar los horarios '
+                +
+                'disponibles. Inténtalo nuevamente.'
+                +
+                '</div>';
+        }
+    }
+
+    function mostrarHorarios(horarios) {
+
+        const contenedor =
+            document.getElementById(
+                'horariosContent'
+            );
+
+        if (!horarios || horarios.length === 0) {
+
+            contenedor.innerHTML =
+                '<div class="no-horarios">'
+                +
+                'Este médico ya no tiene horarios libres '
+                +
+                'para esta fecha.'
+                +
+                '</div>';
+
+
             disponibilidadSeleccionada = null;
+
+            horaSeleccionada = null;
+
+
+            limpiarHorarioSeleccionado();
+
+
             actualizarBoton();
+
+            return;
         }
 
-        function seleccionarHorario(element, disponibilidadId) {
-            console.log("Seleccionando disponibilidad:", disponibilidadId);
-            
-            document.querySelectorAll('.horario-option').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            element.classList.add('selected');
-            disponibilidadSeleccionada = disponibilidadId;
-            document.getElementById('disponibilidadId').value = disponibilidadId;
-            
-            console.log("Input value set to:", document.getElementById('disponibilidadId').value);
-            actualizarBoton();
-        }
+        const grid =
+            document.createElement('div');
 
-        function actualizarBoton() {
-            const submitBtn = document.getElementById('submitBtn');
-            if (fechaSeleccionada && medicoSeleccionado && disponibilidadSeleccionada) {
-                submitBtn.disabled = false;
-                console.log("Botón habilitado");
-            } else {
-                submitBtn.disabled = true;
-                console.log("Botón deshabilitado - F:", fechaSeleccionada, "M:", medicoSeleccionado, "D:", disponibilidadSeleccionada);
-            }
-        }
 
-        document.getElementById('formCita').addEventListener('submit', function(e) {
-            console.log("Enviando form, disponibilidad:", document.getElementById('disponibilidadId').value);
-            
-            if (!document.getElementById('disponibilidadId').value) {
-                e.preventDefault();
-                alert('Por favor completa todos los pasos');
-                return false;
-            }
+        grid.className =
+            'horario-grid';
+
+        horarios.forEach(horario => {
+
+            const boton =
+                document.createElement('div');
+
+
+            boton.className =
+                'horario-option';
+
+            boton.addEventListener(
+                'click',
+
+                function () {
+
+                    seleccionarHorario(
+                        boton,
+                        horario.disponibilidadId,
+                        horario.horaInicio
+                    );
+                }
+            );
+
+            const tiempo =
+                document.createElement('div');
+
+
+            tiempo.className =
+                'horario-tiempo';
+
+
+            tiempo.textContent =
+                horario.horaInicio
+                +
+                ' - '
+                +
+                horario.horaFin;
+
+            const disponible =
+                document.createElement('div');
+
+
+            disponible.className =
+                'horario-disponible';
+
+
+            disponible.textContent =
+                'Disponible';
+
+
+            boton.appendChild(tiempo);
+
+            boton.appendChild(disponible);
+
+            grid.appendChild(boton);
         });
 
-        console.log("Script cargado, disponibilidades totales:", todasDisponibilidades.length);
-    </script>
+        contenedor.innerHTML = '';
+
+        contenedor.appendChild(grid);
+    }
+
+    function seleccionarHorario(
+        element,
+        disponibilidadId,
+        hora
+    ) {
+
+        console.log(
+            'Seleccionando disponibilidad:',
+            disponibilidadId,
+            'hora:',
+            hora
+        );
+
+        document
+            .querySelectorAll('.horario-option')
+            .forEach(el => {
+
+                el.classList.remove('selected');
+
+            });
+
+        element.classList.add('selected');
+
+        disponibilidadSeleccionada =
+            disponibilidadId;
+
+
+        horaSeleccionada =
+            hora;
+
+        document
+            .getElementById('disponibilidadId')
+            .value =
+            disponibilidadId;
+
+
+        document
+            .getElementById('horaSeleccionada')
+            .value =
+            hora;
+
+
+        console.log(
+            'Disponibilidad seleccionada:',
+            disponibilidadSeleccionada
+        );
+
+
+        console.log(
+            'Hora seleccionada:',
+            horaSeleccionada
+        );
+
+
+        actualizarBoton();
+    }
+
+    function limpiarHorarioSeleccionado() {
+
+        disponibilidadSeleccionada = null;
+
+        horaSeleccionada = null;
+
+
+        document
+            .getElementById(
+                'disponibilidadId'
+            )
+            .value = '';
+
+
+        document
+            .getElementById(
+                'horaSeleccionada'
+            )
+            .value = '';
+    }
+
+    function actualizarBoton() {
+
+        const submitBtn =
+            document.getElementById(
+                'submitBtn'
+            );
+
+        const completo =
+            fechaSeleccionada
+            &&
+            medicoSeleccionado
+            &&
+            disponibilidadSeleccionada
+            &&
+            horaSeleccionada;
+
+
+        submitBtn.disabled =
+            !completo;
+
+
+        console.log(
+            'Estado formulario:',
+            {
+                fecha: fechaSeleccionada,
+                medico: medicoSeleccionado,
+                disponibilidad:
+                    disponibilidadSeleccionada,
+                hora: horaSeleccionada,
+                habilitado: completo
+            }
+        );
+    }
+
+    document
+        .getElementById('formCita')
+        .addEventListener(
+            'submit',
+
+            function (e) {
+
+                const disponibilidadId =
+                    document
+                        .getElementById(
+                            'disponibilidadId'
+                        )
+                        .value;
+
+
+                const hora =
+                    document
+                        .getElementById(
+                            'horaSeleccionada'
+                        )
+                        .value;
+
+
+                console.log(
+                    'Enviando reserva:',
+                    {
+                        disponibilidadId:
+                            disponibilidadId,
+                        horaSeleccionada:
+                            hora
+                    }
+                );
+
+                if (
+                    !disponibilidadId
+                    ||
+                    !hora
+                ) {
+
+                    e.preventDefault();
+
+
+                    alert(
+                        'Por favor selecciona '
+                        +
+                        'una fecha, un médico '
+                        +
+                        'y un horario.'
+                    );
+
+
+                    return false;
+                }
+
+                document
+                    .getElementById(
+                        'submitBtn'
+                    )
+                    .disabled = true;
+
+
+                return true;
+            }
+        );
+
+
+    console.log(
+        'Formulario de citas cargado.'
+    );
+
+
+    console.log(
+        'Disponibilidades recibidas:',
+        todasDisponibilidades.length
+    );
+
+</script>
+
 </body>
 </html>

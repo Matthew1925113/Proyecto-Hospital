@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
     <title>Gestión de Citas</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
+
+
     <style>
+
+        /* =========================================================
+           ESTADOS DE LAS CITAS
+           ========================================================= */
+
         .badge {
             display: inline-block;
             padding: 0.4rem 0.8rem;
@@ -13,146 +32,837 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
+
+
         .badge-pendiente {
             background-color: #fff3cd;
             color: #856404;
         }
+
+
         .badge-confirmada {
             background-color: #d4edda;
             color: #155724;
         }
+
+
         .badge-cancelada {
             background-color: #f8d7da;
             color: #721c24;
         }
+
+
+        /*
+         * Nuevo estado para las citas
+         * rechazadas por el médico.
+         */
+        .badge-rechazada {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+
+        /* =========================================================
+           ACCIONES
+           ========================================================= */
+
+        .acciones-cita {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+
+        .acciones-cita form {
+            margin: 0;
+        }
+
+
+        .btn-rechazar {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+
+        .btn-rechazar:hover {
+            background-color: #bb2d3b;
+            color: white;
+        }
+
+
+        .medico-info {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
     </style>
+
 </head>
+
+
 <body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
-                <nav class="navbar-nav" aria-label="Main navigation">
-                    <a class="nav-link" th:href="@{/inicio}">Inicio</a>
-                    <a class="nav-link" th:href="@{/citas/nueva}">Nueva Cita</a>
-                    <form th:action="@{/logout}" method="post" class="inline-form">
-                        <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
-                    </form>
-                </nav>
-            </div>
-        </header>
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1>Gestión de Citas</h1>
+<div class="page-wrapper">
+
+
+    <!-- =========================================================
+         NAVBAR
+         ========================================================= -->
+    <header
+        class="navbar"
+        role="banner">
+
+        <div class="container">
+
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+
+                Hospital
+
+            </a>
+
+
+            <nav
+                class="navbar-nav"
+                aria-label="Main navigation">
+
+
+                <a
+                    class="nav-link"
+                    th:href="@{/inicio}">
+
+                    Inicio
+
+                </a>
+
+
+                <!-- =================================================
+                     NUEVA CITA
+                     =================================================
+                     El médico NO solicita citas desde aquí.
+                     ================================================= -->
+                <a
+                    class="nav-link"
+                    th:if="${usuario.rol == 'USUARIO' or usuario.rol == 'ADMIN'}"
+                    th:href="@{/citas/nueva}">
+
+                    Nueva Cita
+
+                </a>
+
+
+                <!-- =================================================
+                     CERRAR SESIÓN
+                     ================================================= -->
+                <form
+                    th:action="@{/logout}"
+                    method="post"
+                    class="inline-form">
+
+                    <button
+                        type="submit"
+                        class="btn btn-link nav-link p-0">
+
+                        Cerrar Sesión
+
+                    </button>
+
+                </form>
+
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         CONTENIDO PRINCIPAL
+         ========================================================= -->
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+
+            <!-- =================================================
+                 ENCABEZADO
+                 ================================================= -->
+            <div class="page-header">
+
+
+                <!-- ADMIN -->
+                <h1
+                    th:if="${usuario.rol == 'ADMIN'}">
+
+                    Gestión de Citas
+
+                </h1>
+
+
+                <!-- PACIENTE -->
+                <h1
+                    th:if="${usuario.rol == 'USUARIO'}">
+
+                    Mis Citas
+
+                </h1>
+
+
+                <!-- MEDICO -->
+                <h1
+                    th:if="${usuario.rol == 'MEDICO'}">
+
+                    Mis Citas Médicas
+
+                </h1>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 MENSAJE DE ERROR
+                 ================================================= -->
+            <div
+                th:if="${error}"
+                class="alert alert-danger"
+                th:text="${error}">
+            </div>
+
+
+            <!-- =================================================
+                 INFORMACIÓN DEL MÉDICO
+                 =================================================
+                 Solo aparece cuando quien inició sesión
+                 tiene rol MEDICO.
+                 ================================================= -->
+            <div
+                th:if="${usuario.rol == 'MEDICO' and medicoActual != null}"
+                class="medico-info">
+
+                <strong>Médico:</strong>
+
+                <span
+                    th:text="${medicoActual.nombre + ' ' + medicoActual.apellido}">
+                </span>
+
+                <br>
+
+                <strong>Especialidad:</strong>
+
+                <span
+                    th:text="${medicoActual.especialidad}">
+                </span>
+
+                <br>
+
+                <small class="text-muted">
+
+                    Aquí puedes consultar tus citas y gestionar
+                    las solicitudes que se encuentren pendientes.
+
+                </small>
+
+            </div>
+
+
+            <!-- =================================================
+                 FILTROS DEL ADMINISTRADOR
+                 ================================================= -->
+            <div
+                th:if="${usuario.rol == 'ADMIN'}"
+                class="card"
+                style="margin-bottom: 1.5rem;">
+
+                <div class="card-header">
+
+                    Filtrar citas
+
                 </div>
 
-                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                <div th:if="${usuario.rol == 'ADMIN'}" class="card" style="margin-bottom: 1.5rem;">
-                    <div class="card-header">Filtrar citas</div>
-                    <div class="card-body">
-                        <form th:action="@{/citas}" method="get">
-                            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
-                                    <label for="estado" class="form-label">Estado</label>
-                                    <select id="estado" name="estado" class="form-input">
-                                        <option value="">Todos</option>
-                                        <option value="PENDIENTE">Pendiente</option>
-                                        <option value="CONFIRMADA">Confirmada</option>
-                                        <option value="CANCELADA">Cancelada</option>
-                                    </select>
-                                </div>
+                <div class="card-body">
 
-                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
-                                    <label for="medicoIdFiltro" class="form-label">Médico</label>
-                                    <select id="medicoIdFiltro" name="medicoId" class="form-input">
-                                        <option value="">Todos</option>
-                                        <option th:each="m : ${medicos}" th:value="${m.id}"
-                                                th:text="${m.nombre} + ' ' + ${m.apellido}"></option>
-                                    </select>
-                                </div>
+                    <form
+                        th:action="@{/citas}"
+                        method="get">
 
-                                <div class="form-group" style="flex: 1; min-width: 160px; margin-bottom: 0;">
-                                    <label for="especialidad" class="form-label">Especialidad</label>
-                                    <input type="text" id="especialidad" name="especialidad" class="form-input"
-                                           placeholder="Ej: Cardiología">
-                                </div>
 
-                                <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
-                                    <label for="fechaDesdeStr" class="form-label">Desde</label>
-                                    <input type="date" id="fechaDesdeStr" name="fechaDesdeStr" class="form-input">
-                                </div>
+                        <div
+                            style="
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 1rem;
+                            ">
 
-                                <div class="form-group" style="min-width: 150px; margin-bottom: 0;">
-                                    <label for="fechaHastaStr" class="form-label">Hasta</label>
-                                    <input type="date" id="fechaHastaStr" name="fechaHastaStr" class="form-input">
-                                </div>
 
-                                <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
-                                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                                    <a th:href="@{/citas}" class="btn btn-outline">Limpiar</a>
-                                </div>
+                            <!-- =====================================
+                                 ESTADO
+                                 ===================================== -->
+                            <div
+                                class="form-group"
+                                style="
+                                    flex: 1;
+                                    min-width: 160px;
+                                    margin-bottom: 0;
+                                ">
+
+                                <label
+                                    for="estado"
+                                    class="form-label">
+
+                                    Estado
+
+                                </label>
+
+
+                                <select
+                                    id="estado"
+                                    name="estado"
+                                    class="form-input">
+
+                                    <option value="">
+                                        Todos
+                                    </option>
+
+                                    <option value="PENDIENTE">
+                                        Pendiente
+                                    </option>
+
+                                    <option value="CONFIRMADA">
+                                        Confirmada
+                                    </option>
+
+                                    <option value="RECHAZADA">
+                                        Rechazada
+                                    </option>
+
+                                    <option value="CANCELADA">
+                                        Cancelada
+                                    </option>
+
+                                </select>
+
                             </div>
-                        </form>
-                    </div>
-                </div>
 
-                <div class="card">
-                    <div class="card-body p-0">
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Usuario</th>
-                                        <th>Médico</th>
-                                        <th>Especialidad</th>
-                                        <th>Fecha</th>
-                                        <th>Hora</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:if="${#lists.isEmpty(citas)}">
-                                        <td colspan="7" class="text-center" style="padding: 3rem;">No hay citas registradas</td>
-                                    </tr>
 
-                                    <tr th:each="cita : ${citas}">
-                                        <td th:text="${cita.usuario.nombre}"></td>
-                                        <td th:text="${cita.medico.nombre} + ' ' + ${cita.medico.apellido}"></td>
-                                        <td th:text="${cita.medico.especialidad}"></td>
-                                        <td th:text="${cita.fecha}"></td>
-                                        <td th:text="${cita.hora}"></td>
-                                        <td>
-                                            <span th:if="${cita.estado == 'PENDIENTE'}" class="badge badge-pendiente" th:text="${cita.estado}"></span>
-                                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="badge badge-confirmada" th:text="${cita.estado}"></span>
-                                            <span th:if="${cita.estado == 'CANCELADA'}" class="badge badge-cancelada" th:text="${cita.estado}"></span>
-                                        </td>
-                                        <td>
-                                            <a th:if="${usuario.rol == 'ADMIN' and cita.estado == 'PENDIENTE'}"
-                                               th:href="@{/citas/confirmar/{id}(id=${cita.id})}"
-                                               class="btn btn-sm btn-primary">Confirmar</a>
-                                            <a th:if="${cita.estado != 'CANCELADA'}"
-                                               th:href="@{/citas/cancelar/{id}(id=${cita.id})}"
-                                               class="btn btn-sm btn-danger"
-                                               onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">Cancelar</a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <!-- =====================================
+                                 MÉDICO
+                                 ===================================== -->
+                            <div
+                                class="form-group"
+                                style="
+                                    flex: 1;
+                                    min-width: 160px;
+                                    margin-bottom: 0;
+                                ">
+
+                                <label
+                                    for="medicoIdFiltro"
+                                    class="form-label">
+
+                                    Médico
+
+                                </label>
+
+
+                                <select
+                                    id="medicoIdFiltro"
+                                    name="medicoId"
+                                    class="form-input">
+
+                                    <option value="">
+                                        Todos
+                                    </option>
+
+
+                                    <option
+                                        th:each="m : ${medicos}"
+                                        th:value="${m.id}"
+                                        th:text="${m.nombre + ' ' + m.apellido}">
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- =====================================
+                                 ESPECIALIDAD
+                                 ===================================== -->
+                            <div
+                                class="form-group"
+                                style="
+                                    flex: 1;
+                                    min-width: 160px;
+                                    margin-bottom: 0;
+                                ">
+
+                                <label
+                                    for="especialidad"
+                                    class="form-label">
+
+                                    Especialidad
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    id="especialidad"
+                                    name="especialidad"
+                                    class="form-input"
+                                    placeholder="Ej: Cardiología">
+
+                            </div>
+
+
+                            <!-- =====================================
+                                 DESDE
+                                 ===================================== -->
+                            <div
+                                class="form-group"
+                                style="
+                                    min-width: 150px;
+                                    margin-bottom: 0;
+                                ">
+
+                                <label
+                                    for="fechaDesdeStr"
+                                    class="form-label">
+
+                                    Desde
+
+                                </label>
+
+
+                                <input
+                                    type="date"
+                                    id="fechaDesdeStr"
+                                    name="fechaDesdeStr"
+                                    class="form-input">
+
+                            </div>
+
+
+                            <!-- =====================================
+                                 HASTA
+                                 ===================================== -->
+                            <div
+                                class="form-group"
+                                style="
+                                    min-width: 150px;
+                                    margin-bottom: 0;
+                                ">
+
+                                <label
+                                    for="fechaHastaStr"
+                                    class="form-label">
+
+                                    Hasta
+
+                                </label>
+
+
+                                <input
+                                    type="date"
+                                    id="fechaHastaStr"
+                                    name="fechaHastaStr"
+                                    class="form-input">
+
+                            </div>
+
+
+                            <!-- =====================================
+                                 BOTONES DEL FILTRO
+                                 ===================================== -->
+                            <div
+                                style="
+                                    display: flex;
+                                    gap: 0.75rem;
+                                    align-items: flex-end;
+                                ">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary">
+
+                                    Filtrar
+
+                                </button>
+
+
+                                <a
+                                    th:href="@{/citas}"
+                                    class="btn btn-outline">
+
+                                    Limpiar
+
+                                </a>
+
+                            </div>
+
+
                         </div>
-                    </div>
-                </div>
-            </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
+                    </form>
+
+                </div>
+
             </div>
-        </footer>
-    </div>
+
+
+            <!-- =================================================
+                 TABLA DE CITAS
+                 ================================================= -->
+            <div class="card">
+
+                <div class="card-body p-0">
+
+                    <div class="table-container">
+
+                        <table class="table">
+
+
+                            <!-- =====================================
+                                 CABECERA
+                                 ===================================== -->
+                            <thead>
+
+                            <tr>
+
+                                <th>Paciente</th>
+
+                                <th>Médico</th>
+
+                                <th>Especialidad</th>
+
+                                <th>Fecha</th>
+
+                                <th>Hora</th>
+
+                                <th>Estado</th>
+
+                                <th>Acciones</th>
+
+                            </tr>
+
+                            </thead>
+
+
+                            <!-- =====================================
+                                 CUERPO
+                                 ===================================== -->
+                            <tbody>
+
+
+                            <!-- =====================================
+                                 SIN CITAS
+                                 ===================================== -->
+                            <tr
+                                th:if="${#lists.isEmpty(citas)}">
+
+                                <td
+                                    colspan="7"
+                                    class="text-center"
+                                    style="padding: 3rem;">
+
+
+                                    <span
+                                        th:if="${usuario.rol == 'MEDICO'}">
+
+                                        No tienes citas asignadas actualmente.
+
+                                    </span>
+
+
+                                    <span
+                                        th:if="${usuario.rol == 'USUARIO'}">
+
+                                        No tienes citas registradas.
+
+                                    </span>
+
+
+                                    <span
+                                        th:if="${usuario.rol == 'ADMIN'}">
+
+                                        No hay citas registradas.
+
+                                    </span>
+
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- =====================================
+                                 CITAS
+                                 ===================================== -->
+                            <tr
+                                th:each="cita : ${citas}">
+
+
+                                <!-- PACIENTE -->
+                                <td
+                                    th:text="${cita.usuario != null
+                                        ? cita.usuario.nombre
+                                        : 'Sin paciente'}">
+                                </td>
+
+
+                                <!-- MÉDICO -->
+                                <td
+                                    th:text="${cita.medico != null
+                                        ? cita.medico.nombre + ' ' + cita.medico.apellido
+                                        : 'Sin médico'}">
+                                </td>
+
+
+                                <!-- ESPECIALIDAD -->
+                                <td
+                                    th:text="${cita.medico != null
+                                        ? cita.medico.especialidad
+                                        : '-'}">
+                                </td>
+
+
+                                <!-- FECHA -->
+                                <td
+                                    th:text="${cita.fecha}">
+                                </td>
+
+
+                                <!-- HORA -->
+                                <td
+                                    th:text="${cita.hora}">
+                                </td>
+
+
+                                <!-- =================================
+                                     ESTADO
+                                     ================================= -->
+                                <td>
+
+
+                                    <!-- PENDIENTE -->
+                                    <span
+                                        th:if="${cita.estado == 'PENDIENTE'}"
+                                        class="badge badge-pendiente">
+
+                                        PENDIENTE
+
+                                    </span>
+
+
+                                    <!-- CONFIRMADA -->
+                                    <span
+                                        th:if="${cita.estado == 'CONFIRMADA'}"
+                                        class="badge badge-confirmada">
+
+                                        CONFIRMADA
+
+                                    </span>
+
+
+                                    <!-- RECHAZADA -->
+                                    <span
+                                        th:if="${cita.estado == 'RECHAZADA'}"
+                                        class="badge badge-rechazada">
+
+                                        RECHAZADA
+
+                                    </span>
+
+
+                                    <!-- CANCELADA -->
+                                    <span
+                                        th:if="${cita.estado == 'CANCELADA'}"
+                                        class="badge badge-cancelada">
+
+                                        CANCELADA
+
+                                    </span>
+
+
+                                </td>
+
+
+                                <!-- =================================
+                                     ACCIONES
+                                     ================================= -->
+                                <td>
+
+                                    <div class="acciones-cita">
+
+
+                                        <!-- =============================
+                                             VER DETALLE
+                                             ============================= -->
+                                        <a
+                                            th:href="@{/citas/{id}(id=${cita.id})}"
+                                            class="btn btn-sm btn-outline">
+
+                                            Ver
+
+                                        </a>
+
+
+                                        <!-- =============================
+                                             CONFIRMAR
+                                             =============================
+                                             Solamente:
+                                             - ADMIN
+                                             - MEDICO
+
+                                             y únicamente cuando:
+                                             estado = PENDIENTE
+                                             ============================= -->
+                                        <form
+                                            th:if="${cita.estado == 'PENDIENTE'
+                                                and (usuario.rol == 'ADMIN'
+                                                or usuario.rol == 'MEDICO')}"
+                                            th:action="@{/citas/confirmar/{id}(id=${cita.id})}"
+                                            method="post">
+
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-primary"
+                                                onclick="return confirm(
+                                                    '¿Deseas confirmar esta cita?'
+                                                );">
+
+                                                Confirmar
+
+                                            </button>
+
+                                        </form>
+
+
+                                        <!-- =============================
+                                             RECHAZAR
+                                             =============================
+                                             Solamente:
+                                             - ADMIN
+                                             - MEDICO
+
+                                             y únicamente:
+                                             PENDIENTE
+                                             ============================= -->
+                                        <form
+                                            th:if="${cita.estado == 'PENDIENTE'
+                                                and (usuario.rol == 'ADMIN'
+                                                or usuario.rol == 'MEDICO')}"
+                                            th:action="@{/citas/rechazar/{id}(id=${cita.id})}"
+                                            method="post">
+
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-rechazar"
+                                                onclick="return confirm(
+                                                    '¿Estás seguro de que deseas rechazar esta cita? El horario volverá a quedar disponible.'
+                                                );">
+
+                                                Rechazar
+
+                                            </button>
+
+                                        </form>
+
+
+                                        <!-- =============================
+                                             CANCELAR
+                                             =============================
+                                             El paciente cancela.
+
+                                             ADMIN también puede cancelar.
+
+                                             MEDICO NO cancela.
+                                             ============================= -->
+                                        <form
+                                            th:if="${
+                                                (usuario.rol == 'USUARIO'
+                                                or usuario.rol == 'ADMIN')
+                                                and
+                                                (cita.estado == 'PENDIENTE'
+                                                or cita.estado == 'CONFIRMADA')
+                                            }"
+                                            th:action="@{/citas/cancelar/{id}(id=${cita.id})}"
+                                            method="post">
+
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm(
+                                                    '¿Estás seguro de que deseas cancelar esta cita?'
+                                                );">
+
+                                                Cancelar
+
+                                            </button>
+
+                                        </form>
+
+
+                                        <!-- =============================
+                                             SIN ACCIONES
+                                             =============================
+                                             RECHAZADA o CANCELADA
+                                             solamente permiten ver
+                                             el detalle.
+                                             ============================= -->
+
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="footer">
+
+        <div class="container">
+
+            Hospital - Sistema de Gestión
+
+        </div>
+
+    </footer>
+
+</div>
+
 </body>
+
 </html>
