@@ -1,71 +1,408 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
-<body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}">Hospital</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <nav class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/inicio}">Inicio</a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                            <a class="nav-link" th:href="@{/pacienteNuevo}">Nuevo Paciente</a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','USUARIO')">
-                            <a class="nav-link" th:href="@{/citas}">Citas</a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasRole('USUARIO')">
-                            <a class="nav-link" th:href="@{/perfil}">Mi perfil</a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                            <a class="nav-link" th:href="@{/medicos}">Médicos</a>
-                        </li>
-                        <li class="nav-item">
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-link nav-link p-0">Cerrar Sesión</button>
-                            </form>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    lang="es">
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1>Panel de Control</h1>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Inicio</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<div class="page-wrapper">
+
+    <!-- =========================================================
+         NAVBAR
+         ========================================================= -->
+    <header
+        class="navbar"
+        role="banner">
+
+        <div class="container">
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+                Hospital
+            </a>
+
+
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+
+            <nav
+                class="collapse navbar-collapse"
+                id="navbarNav">
+
+                <ul class="navbar-nav">
+
+
+                    <!-- =========================================
+                         INICIO
+                         ========================================= -->
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            th:href="@{/inicio}">
+
+                            Inicio
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- =========================================
+                         NUEVO PACIENTE
+                         SOLO ADMIN
+                         ========================================= -->
+                    <li
+                        class="nav-item"
+                        sec:authorize="hasRole('ADMIN')">
+
+                        <a
+                            class="nav-link"
+                            th:href="@{/pacienteNuevo}">
+
+                            Nuevo Paciente
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- =========================================
+                         CITAS
+                         ADMIN / USUARIO / MEDICO
+                         ========================================= -->
+                    <li
+                        class="nav-item"
+                        sec:authorize="hasAnyRole('ADMIN','USUARIO','MEDICO')">
+
+                        <a
+                            class="nav-link"
+                            th:href="@{/citas}">
+
+                            Citas
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- =========================================
+                         PERFIL
+                         SOLO USUARIO
+                         ========================================= -->
+                    <li
+                        class="nav-item"
+                        sec:authorize="hasRole('USUARIO')">
+
+                        <a
+                            class="nav-link"
+                            th:href="@{/perfil}">
+
+                            Mi perfil
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- =========================================
+                         ADMINISTRAR MÉDICOS
+                         SOLO ADMIN
+                         ========================================= -->
+                    <li
+                        class="nav-item"
+                        sec:authorize="hasRole('ADMIN')">
+
+                        <a
+                            class="nav-link"
+                            th:href="@{/listaMedicos}">
+
+                            Médicos
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- =========================================
+                         CERRAR SESIÓN
+                         ========================================= -->
+                    <li class="nav-item">
+
+                        <form
+                            th:action="@{/logout}"
+                            method="post"
+                            class="d-inline">
+
+                            <button
+                                type="submit"
+                                class="btn btn-link nav-link p-0">
+
+                                Cerrar Sesión
+
+                            </button>
+
+                        </form>
+
+                    </li>
+
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         CONTENIDO PRINCIPAL
+         ========================================================= -->
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+
+            <!-- =================================================
+                 ENCABEZADO
+                 ================================================= -->
+            <div class="page-header">
+
+                <h1>Panel de Control</h1>
+
+                <!-- ADMIN -->
+                <p
+                    class="text-muted"
+                    sec:authorize="hasRole('ADMIN')">
+
+                    Administración general del sistema hospitalario.
+
+                </p>
+
+
+                <!-- PACIENTE -->
+                <p
+                    class="text-muted"
+                    sec:authorize="hasRole('USUARIO')">
+
+                    Gestiona tus citas y la información de tu cuenta.
+
+                </p>
+
+
+                <!-- MEDICO -->
+                <p
+                    class="text-muted"
+                    sec:authorize="hasRole('MEDICO')">
+
+                    Consulta y gestiona las solicitudes de citas asignadas a ti.
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 PANEL DEL ADMINISTRADOR
+                 ================================================= -->
+            <div
+                class="row g-4"
+                sec:authorize="hasRole('ADMIN')">
+
+
+                <!-- =============================================
+                     PACIENTES
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <path
+                                        d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2">
+                                    </path>
+
+                                    <circle
+                                        cx="9"
+                                        cy="7"
+                                        r="4">
+                                    </circle>
+
+                                    <path
+                                        d="M23 21v-2a4 4 0 0 0-3-3.87">
+                                    </path>
+
+                                    <path
+                                        d="M16 3.13a4 4 0 0 1 0 7.75">
+                                    </path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Pacientes
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Gestionar pacientes registrados
+                            </p>
+
+
+                            <a
+                                th:href="@{/listaPacientes}"
+                                class="btn btn-primary w-100">
+
+                                Ver pacientes
+
+                            </a>
+
+
+                            <a
+                                th:href="@{/pacienteNuevo}"
+                                class="btn btn-outline w-100 mt-2">
+
+                                Nuevo paciente
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div class="row g-4" sec:authorize="hasRole('ADMIN')">
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <div style="width: 64px; height: 64px; margin: 0 auto 1rem; background: var(--primary-light); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="9" cy="7" r="4"></circle>
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="h5 mb-1">Pacientes</h3>
-                                <p class="text-muted mb-3">Gestionar pacientes</p>
-                                <a th:href="@{/listaPacientes}" class="btn btn-primary w-100">Ver pacientes</a>
-                                <a th:href="@{/pacienteNuevo}" class="btn btn-outline w-100 mt-2">Nuevo paciente</a>
+
+                <!-- =============================================
+                     MÉDICOS
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <path
+                                        d="M22 11.08V12a10 10 0 1 1-5.93-9.14">
+                                    </path>
+
+                                    <polyline
+                                        points="22 4 12 14.01 9 11.01">
+                                    </polyline>
+
+                                </svg>
+
                             </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Médicos
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Administrar médicos
+                            </p>
+
+
+                            <a
+                                th:href="@{/listaMedicos}"
+                                class="btn btn-primary w-100">
+
+                                Ver médicos
+
+                            </a>
+
+
+                            <a
+                                th:href="@{/nuevoMedico}"
+                                class="btn btn-outline w-100 mt-2">
+
+                                Nuevo médico
+
+                            </a>
+
                         </div>
+
                     </div>
 
                     <div class="col-12 col-md-6 col-lg-6">
@@ -130,50 +467,488 @@
                     </div>
                 </div>
 
-                <div class="row g-4" sec:authorize="hasRole('USUARIO')">
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <div style="width: 64px; height: 64px; margin: 0 auto 1rem; background: var(--primary-light); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
-                                        <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                                        <path d="M8 21h8"></path>
-                                        <path d="M12 17v4"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="h5 mb-1">Gestión de citas</h3>
-                                <p class="text-muted mb-3">Agendar y consultar tus citas</p>
-                                <a th:href="@{/citas}" class="btn btn-primary w-100">Ir a citas</a>
+
+                <!-- =============================================
+                     USUARIOS
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <path
+                                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2">
+                                    </path>
+
+                                    <circle
+                                        cx="12"
+                                        cy="7"
+                                        r="4">
+                                    </circle>
+
+                                </svg>
+
                             </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Usuarios
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Administrar usuarios del sistema
+                            </p>
+
+
+                            <a
+                                th:href="@{/listaUsuarios}"
+                                class="btn btn-primary w-100">
+
+                                Ver usuarios
+
+                            </a>
+
+
+                            <a
+                                th:href="@{/nuevoUsuario}"
+                                class="btn btn-outline w-100 mt-2">
+
+                                Nuevo usuario
+
+                            </a>
+
                         </div>
+
                     </div>
 
-                    <div class="col-12 col-md-6 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <div style="width: 64px; height: 64px; margin: 0 auto 1rem; background: var(--primary-light); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
-                                        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5z"></path>
-                                        <path d="M4 21a8 8 0 0 1 16 0"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="h5 mb-1">Mi usuario</h3>
-                                <p class="text-muted mb-3">Actualizar tus datos de acceso</p>
-                                <a th:href="@{/perfil}" class="btn btn-outline w-100">Editar perfil</a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
+
+                <!-- =============================================
+                     CITAS ADMIN
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="17"
+                                        rx="2">
+                                    </rect>
+
+                                    <path d="M16 2v4"></path>
+                                    <path d="M8 2v4"></path>
+                                    <path d="M3 10h18"></path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Citas
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Consultar y administrar citas
+                            </p>
+
+
+                            <a
+                                th:href="@{/citas}"
+                                class="btn btn-primary w-100">
+
+                                Ver citas
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
-        </footer>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+
+            <!-- =================================================
+                 PANEL DEL PACIENTE
+                 ================================================= -->
+            <div
+                class="row g-4"
+                sec:authorize="hasRole('USUARIO')">
+
+
+                <!-- =============================================
+                     CITAS DEL PACIENTE
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <rect
+                                        x="2"
+                                        y="3"
+                                        width="20"
+                                        height="14"
+                                        rx="2">
+                                    </rect>
+
+                                    <path d="M8 21h8"></path>
+                                    <path d="M12 17v4"></path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Gestión de citas
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Solicita y consulta tus citas médicas
+                            </p>
+
+
+                            <a
+                                th:href="@{/citas}"
+                                class="btn btn-primary w-100">
+
+                                Mis citas
+
+                            </a>
+
+
+                            <a
+                                th:href="@{/citas/nueva}"
+                                class="btn btn-outline w-100 mt-2">
+
+                                Solicitar nueva cita
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     PERFIL DEL PACIENTE
+                     ============================================= -->
+                <div class="col-12 col-md-6 col-lg-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <path
+                                        d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5z">
+                                    </path>
+
+                                    <path
+                                        d="M4 21a8 8 0 0 1 16 0">
+                                    </path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Mi usuario
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Actualizar tus datos de acceso
+                            </p>
+
+
+                            <a
+                                th:href="@{/perfil}"
+                                class="btn btn-outline w-100">
+
+                                Editar perfil
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PANEL DEL MÉDICO
+                 ================================================= -->
+            <div
+                class="row g-4"
+                sec:authorize="hasRole('MEDICO')">
+
+
+                <!-- =============================================
+                     MIS CITAS MÉDICAS
+                     ============================================= -->
+                <div class="col-12 col-md-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="17"
+                                        rx="2">
+                                    </rect>
+
+                                    <path d="M16 2v4"></path>
+                                    <path d="M8 2v4"></path>
+                                    <path d="M3 10h18"></path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Mis citas médicas
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Consulta todas las citas asignadas a ti
+                            </p>
+
+
+                            <a
+                                th:href="@{/citas}"
+                                class="btn btn-primary w-100">
+
+                                Ver mis citas
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     GESTIONAR SOLICITUDES
+                     ============================================= -->
+                <div class="col-12 col-md-6">
+
+                    <div class="card h-100">
+
+                        <div class="card-body text-center">
+
+                            <div
+                                style="
+                                    width: 64px;
+                                    height: 64px;
+                                    margin: 0 auto 1rem;
+                                    background: var(--primary-light);
+                                    border-radius: var(--radius-lg);
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    style="color: var(--primary);">
+
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9">
+                                    </circle>
+
+                                    <path
+                                        d="M8 12l2.5 2.5L16 9">
+                                    </path>
+
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="h5 mb-1">
+                                Gestionar solicitudes
+                            </h3>
+
+                            <p class="text-muted mb-3">
+                                Confirma o rechaza las citas que se encuentren pendientes
+                            </p>
+
+
+                            <a
+                                th:href="@{/citas}"
+                                class="btn btn-primary w-100">
+
+                                Gestionar citas
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="footer">
+
+        <div class="container">
+
+            Hospital - Sistema de Gestión
+
+        </div>
+
+    </footer>
+
+</div>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+</script>
+
 </body>
+
 </html>

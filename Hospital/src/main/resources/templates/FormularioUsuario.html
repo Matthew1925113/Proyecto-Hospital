@@ -1,36 +1,94 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'">Usuario</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title
+        th:text="${usuario.id} == null
+            ? 'Nuevo Usuario'
+            : 'Editar Usuario'">
+        Usuario
+    </title>
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/style.css}">
 </head>
+
 <body>
-    <div class="page-wrapper">
-        <header class="navbar" role="banner">
-            <div class="container">
-                <a class="navbar-brand" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Hospital</a>
-                <a class="navbar-brand" th:href="@{/listaUsuarios}" sec:authorize="hasAnyRole('ADMIN')">Hospital</a>
-                <nav class="navbar-nav" aria-label="Main navigation">
-                    <a class="nav-link" th:href="@{/inicio}" sec:authorize="hasRole('ADMIN')">Inicio</a>
-                    <a class="nav-link" th:href="@{/listaUsuarios}">Lista Usuarios</a>
-                </nav>
+
+<div class="page-wrapper">
+
+    <!-- =========================================================
+         NAVBAR
+         ========================================================= -->
+    <header
+        class="navbar"
+        role="banner">
+
+        <div class="container">
+
+            <a
+                class="navbar-brand"
+                th:href="@{/inicio}">
+                Hospital
+            </a>
+
+            <nav
+                class="navbar-nav"
+                aria-label="Main navigation">
+
+                <a
+                    class="nav-link"
+                    th:href="@{/inicio}">
+                    Inicio
+                </a>
+
+                <a
+                    class="nav-link"
+                    th:href="@{/listaUsuarios}">
+                    Lista Usuarios
+                </a>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         CONTENIDO
+         ========================================================= -->
+    <main
+        class="main-content"
+        role="main">
+
+        <div class="container">
+
+            <div class="page-header">
+
+                <h1
+                    th:text="${usuario.id} == null
+                        ? 'Nuevo Usuario'
+                        : 'Editar Usuario'">
+                    Usuario
+                </h1>
+
             </div>
-        </header>
 
-        <main class="main-content" role="main">
-            <div class="container">
-                <div class="page-header">
-                    <h1 th:text="${usuario.id} == null ? 'Nuevo Usuario' : 'Editar Usuario'">Usuario</h1>
-                </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            <div class="card">
 
-                        <form th:action="@{/GuardarUsuario}" th:object="${usuario}" method="post">
-                            <input type="hidden" th:field="*{id}" />
+                <div class="card-body">
 
                             <div class="form-group">
                                 <label for="nombre" class="form-label">Nombre</label>
@@ -71,15 +129,241 @@
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
-        </main>
 
-        <footer class="footer">
-            <div class="container">
-                Hospital - Sistema de Gestión
+
+                    <!-- =================================================
+                         FORMULARIO
+                         ================================================= -->
+                    <form
+                        th:action="@{/GuardarUsuario}"
+                        th:object="${usuario}"
+                        method="post">
+
+                        <input
+                            type="hidden"
+                            th:field="*{id}">
+
+
+                        <!-- =============================================
+                             NOMBRE
+                             ============================================= -->
+                        <div class="form-group">
+
+                            <label
+                                for="nombre"
+                                class="form-label">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="nombre"
+                                th:field="*{nombre}"
+                                class="form-input"
+                                placeholder="Ingrese el nombre"
+                                required>
+
+                        </div>
+
+
+                        <!-- =============================================
+                             EMAIL
+                             ============================================= -->
+                        <div class="form-group">
+
+                            <label
+                                for="email"
+                                class="form-label">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                th:field="*{email}"
+                                class="form-input"
+                                placeholder="Ingrese el email"
+                                required>
+
+                            <small
+                                id="mensajeMedico"
+                                style="
+                                    display: none;
+                                    margin-top: 0.5rem;
+                                    color: #666;
+                                    line-height: 1.4;
+                                ">
+
+                                Para una cuenta con rol MEDICO,
+                                este correo debe ser exactamente
+                                el mismo correo registrado en el médico.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- =============================================
+                             CONTRASEÑA
+                             ============================================= -->
+                        <div class="form-group">
+
+                            <label
+                                for="password"
+                                class="form-label"
+                                th:text="${usuario.id} == null
+                                    ? 'Contraseña'
+                                    : 'Nueva Contraseña (dejar en blanco para mantener la actual)'">
+
+                                Contraseña
+
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                th:field="*{password}"
+                                class="form-input"
+                                th:required="${usuario.id} == null"
+                                placeholder="Ingrese la contraseña">
+
+                        </div>
+
+
+                        <!-- =============================================
+                             ROL
+                             ============================================= -->
+                        <div class="form-group">
+
+                            <label
+                                for="rol"
+                                class="form-label">
+                                Rol
+                            </label>
+
+                            <select
+                                id="rol"
+                                th:field="*{rol}"
+                                class="form-input"
+                                required>
+
+                                <option value="">
+                                    Seleccione un rol
+                                </option>
+
+                                <option value="ADMIN">
+                                    ADMIN
+                                </option>
+
+                                <option value="USUARIO">
+                                    USUARIO
+                                </option>
+
+                                <option value="MEDICO">
+                                    MEDICO
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <div
+                            style="
+                                display: flex;
+                                gap: 0.75rem;
+                                margin-top: 1.5rem;
+                            ">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary">
+
+                                Guardar
+
+                            </button>
+
+
+                            <a
+                                th:href="@{/listaUsuarios}"
+                                class="btn btn-outline">
+
+                                Cancelar
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
-        </footer>
-    </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="footer">
+
+        <div class="container">
+            Hospital - Sistema de Gestión
+        </div>
+
+    </footer>
+
+</div>
+
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const rolSelect =
+                document.getElementById("rol");
+
+            const mensajeMedico =
+                document.getElementById("mensajeMedico");
+
+
+            function actualizarMensajeMedico() {
+
+                if (
+                    rolSelect.value === "MEDICO"
+                ) {
+
+                    mensajeMedico.style.display =
+                        "block";
+
+                } else {
+
+                    mensajeMedico.style.display =
+                        "none";
+                }
+            }
+
+
+
+            actualizarMensajeMedico();
+
+
+            rolSelect.addEventListener(
+                "change",
+                actualizarMensajeMedico
+            );
+        }
+    );
+
+</script>
+
 </body>
+
 </html>

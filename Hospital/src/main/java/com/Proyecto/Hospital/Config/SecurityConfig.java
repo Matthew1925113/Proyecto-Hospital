@@ -1,31 +1,44 @@
 package com.Proyecto.Hospital.Config;
 
 import com.Proyecto.Hospital.Security.LoginSecurityHeadler;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
+
     private final LoginSecurityHeadler loginSecurityHeadler;
-    public SecurityConfig(LoginSecurityHeadler loginSecurityHeadler) {
+
+    public SecurityConfig(
+        LoginSecurityHeadler loginSecurityHeadler
+    ) {
         this.loginSecurityHeadler = loginSecurityHeadler;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+        HttpSecurity http
+    ) throws Exception {
+
         http
+
             .authorizeHttpRequests(auth -> auth
                 // Rutas públicas
                 .requestMatchers("/login", "/acceso-denegado", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
@@ -41,6 +54,13 @@ public class SecurityConfig  {
                                 "/EliminarUsuario" , "/citas/exportar/**").hasRole("ADMIN")  // Solo ADMIN
                 .anyRequest().authenticated()
             )
+
+
+            /*
+             * =====================================================
+             * LOGIN
+             * =====================================================
+             */
             .formLogin(form -> form
                 .loginPage("/login")
                 .usernameParameter("email")
@@ -54,8 +74,19 @@ public class SecurityConfig  {
                 })
                 .permitAll()
             )
+
+
+            /*
+             * =====================================================
+             * LOGOUT
+             * =====================================================
+             */
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
+
+                .logoutSuccessUrl(
+                    "/login?logout"
+                )
+
                 .permitAll()
             )
             .exceptionHandling(ex -> ex.accessDeniedPage("/acceso-denegado"))
