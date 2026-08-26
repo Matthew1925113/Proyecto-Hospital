@@ -20,12 +20,23 @@
 
     <link
         rel="stylesheet"
-        th:href="@{/css/style.css}">
+        th:href="@{/css/header.css}">
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/main.css}">
+
+    <link
+        rel="stylesheet"
+        th:href="@{/css/footer.css}">
+
 </head>
+
 
 <body>
 
 <div class="page-wrapper">
+
 
     <!-- =========================================================
          NAVBAR
@@ -36,26 +47,36 @@
 
         <div class="container">
 
+
             <a
                 class="navbar-brand"
                 th:href="@{/inicio}">
+
                 Hospital
+
             </a>
+
 
             <nav
                 class="navbar-nav"
                 aria-label="Main navigation">
 
+
                 <a
                     class="nav-link"
                     th:href="@{/inicio}">
+
                     Inicio
+
                 </a>
+
 
                 <a
                     class="nav-link"
                     th:href="@{/listaUsuarios}">
+
                     Lista Usuarios
+
                 </a>
 
             </nav>
@@ -90,44 +111,12 @@
 
                 <div class="card-body">
 
-                            <div class="form-group">
-                                <label for="nombre" class="form-label">Nombre</label>
-                                <input type="text" id="nombre" th:field="*{nombre}" class="form-input" placeholder="Ingrese el nombre" required>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" id="email" th:field="*{email}" class="form-input" placeholder="Ingrese el email" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="password" class="form-label" th:text="${usuario.id} == null ? 'Contraseña' : 'Nueva Contraseña (dejar en blanco para mantener la actual)'">Contraseña</label>
-                                <input type="password" id="password" th:field="*{password}" class="form-input" th:required="${usuario.id} == null" placeholder="Ingrese la contraseña">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="rol" class="form-label">Rol</label>
-                                <select id="rol" th:field="*{rol}" class="form-input" required>
-                                    <option value="">Seleccione un rol</option>
-                                    <option value="ADMIN">ADMIN</option>
-                                    <option value="USUARIO">USUARIO</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="estado" class="form-label">Estado</label>
-                                <select id="estado" th:field="*{estado}" class="form-input" required>
-                                    <option value="">Seleccione un estado</option>
-                                    <option value="ACTIVO">ACTIVO</option>
-                                    <option value="INACTIVO">INACTIVO</option>
-                                </select>
-                            </div>
-
-                            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                                <button type="submit" class="btn btn-primary">Guardar</button>
-                                <a th:href="@{/listaUsuarios}" class="btn btn-outline">Cancelar</a>
-                            </div>
-                        </form>
+                    <div
+                        th:if="${error}"
+                        class="alert alert-danger"
+                        role="alert"
+                        th:text="${error}">
                     </div>
 
 
@@ -268,6 +257,39 @@
                         </div>
 
 
+                        <!-- =============================================
+                             ESTADO
+                             ============================================= -->
+                        <div class="form-group">
+
+                            <label
+                                for="estado"
+                                class="form-label">
+                                Estado
+                            </label>
+
+                            <select
+                                id="estado"
+                                th:field="*{estado}"
+                                class="form-input"
+                                required>
+
+                                <option value="">
+                                    Seleccione un estado
+                                </option>
+
+                                <option value="ACTIVO">
+                                    ACTIVO
+                                </option>
+
+                                <option value="INACTIVO">
+                                    INACTIVO
+                                </option>
+
+                            </select>
+
+                        </div>
+
 
                         <div
                             style="
@@ -312,13 +334,14 @@
     <footer class="footer">
 
         <div class="container">
+
             Hospital - Sistema de Gestión
+
         </div>
 
     </footer>
 
 </div>
-
 
 
 <script>
@@ -349,7 +372,6 @@
                         "none";
                 }
             }
-
 
 
             actualizarMensajeMedico();
